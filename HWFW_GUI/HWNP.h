@@ -48,6 +48,7 @@ https://github.com/LeeXiaolan/hwfw-tool
 #define IIFLAG_RESERVED																		0x00000020U
 
 #define CHKCRC_OK																					0
+#define CHKCRC_FAILED																			11
 #define CHKCRC_FILECRCERR																	191
 #define CHKCRC_HEADERCRCERR																192
 #define CHKCRC_ITEMCRCERR																	200

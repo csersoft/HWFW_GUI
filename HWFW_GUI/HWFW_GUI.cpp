@@ -128,6 +128,7 @@ BOOL GetSaveFilePath(HWND hOwner, LPWSTR lpFilePath, DWORD dwMax)
 BOOL ExportToFile(LPCWSTR lpFile, LPCVOID lpData, DWORD dwSize)
 {
 	HANDLE hFile = CreateFileW(lpFile, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	DWORD dwTmp;
 
 	if (hFile == INVALID_HANDLE_VALUE) return FALSE;
 
@@ -135,8 +136,40 @@ BOOL ExportToFile(LPCWSTR lpFile, LPCVOID lpData, DWORD dwSize)
 	SetEndOfFile(hFile);
 
 	SetFilePointer(hFile, 0, NULL, FILE_BEGIN);
-	WriteFile(hFile, lpData, dwSize, NULL, NULL);
+	WriteFile(hFile, lpData, dwSize, &dwTmp, NULL);
 
+	CloseHandle(hFile);
+	return TRUE;
+}
+
+BOOL ImportFromFile(LPCWSTR lpFile, LPVOID *lppData, DWORD *lpdwSize)
+{
+	HANDLE hFile = CreateFileW(lpFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	LPVOID lpData;
+	DWORD dwSize, dwSizeHigh;
+
+	if (hFile == INVALID_HANDLE_VALUE) return FALSE;
+
+	dwSize = GetFileSize(hFile, &dwSizeHigh);
+	if (dwSizeHigh != 0)
+	{
+		CloseHandle(hFile);
+		return FALSE;
+	}
+
+	lpData = malloc(dwSize);
+	if (lpData == NULL)
+	{
+		CloseHandle(hFile);
+		return FALSE;
+	}
+
+	SetFilePointer(hFile, 0, NULL, FILE_BEGIN);
+	ReadFile(hFile, lpData, dwSize, lpdwSize, NULL);
+
+	*lppData = lpData;
+
+	//free(lpData)
 	CloseHandle(hFile);
 	return TRUE;
 }
@@ -311,6 +344,10 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				else
 					SetStatus(L"获取文件路径失败!");
 			}
+			break;
+
+			case IDM_EXIT:
+			EndDialog(hDlg, 0);
 			break;
 
 			case IDM_ABOUT:
@@ -607,7 +644,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				int nResult;
 				uint32_t u32DataSize;
 				LPCVOID lpData;
-				WCHAR wsTmp[MAX_PATH];
+				WCHAR wsTmp[MAX_PATH] = { 0 };
 
 				if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
 				{
@@ -625,8 +662,51 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 						break;
 					}
 
-					ExportToFile(wsTmp, lpData, u32DataSize);
+					if (ExportToFile(wsTmp, lpData, u32DataSize))
+						SetDialogStatus(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导出项目数据完成.");
+					else
+						SetDialogStatus(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导出项目数据失败,错误码:[%d]!", GetLastError());
 				}
+			}
+			break;
+
+			case IDC_IMPORT:
+			if (lpDlgIIS->dtType == DT_EDIT)
+			{
+				int nResult;
+				DWORD dwDataSize;
+				LPVOID lpData;
+				WCHAR wsTmp[MAX_PATH] = { 0 };
+
+				if (GetOpenFilePath(hDlg, wsTmp, MAX_PATH))
+				{
+					if (ImportFromFile(wsTmp, &lpData, &dwDataSize) == FALSE)
+					{
+						SetDialogStatus(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"打开文件失败,错误码:[%d]!", GetLastError());
+						break;
+					}
+
+					nResult = HWNP_SetItemData(lpDlgIIS->u32Index, lpData, (uint32_t)dwDataSize);
+					free(lpData);
+
+					if (nResult != 0)
+						SetDialogStatus(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导入数据失败,错误码:[%d]!", nResult);
+					else
+					{
+						SetDialogStatus(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导入数据完成.");
+					}
+				}
+			}
+			break;
+
+			case IDOK:
+			if (lpDlgIIS->dtType == DT_EDIT)
+			{
+
+			}
+			else
+			{
+
 			}
 			break;
 

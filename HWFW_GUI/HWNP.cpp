@@ -39,6 +39,7 @@ static inline void HWNP_UpdateItemInfo()
 	{
 		lpItemCopy[u32Index].ItemInfo.u32Offset = u32DataOffset;
 		lpItemCopy[u32Index].ItemInfo.u32Size = lpItemCopy[u32Index].u32DataSize;
+		lpItemCopy[u32Index].ItemInfo.u32ItemCRC32 = crc32_fast(lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize);
 
 		u32DataOffset += lpItemCopy[u32Index].u32DataSize;
 	}
@@ -429,6 +430,7 @@ BOOL HWNP_CheckDuplicate()
 
 uint32_t HWNP_CheckCRC32()
 {
+	if (nState != -1) return CHKCRC_FAILED;
 	uint32_t u32CRC;
 
 	//检查项目CRC
@@ -574,7 +576,7 @@ int HWNP_Save()
 	if (nState != -1) return (nLastError = -1401);
 
 	uint32_t u32FileSize, u32DataSize = 0;
-	DWORD dwOffset = 0;
+	DWORD dwOffset = 0, dwTmp;
 
 	HWNP_Update();
 
@@ -587,18 +589,18 @@ int HWNP_Save()
 	SetEndOfFile(hFile);
 
 	SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
-	WriteFile(hFile, &hwHeader, sizeof(HWNP_HEADER), NULL, NULL);
+	WriteFile(hFile, &hwHeader, sizeof(HWNP_HEADER), &dwTmp, NULL);
 	dwOffset += sizeof(HWNP_HEADER);
 
 	SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
-	WriteFile(hFile, lpProductList, hwHeader.PacketHeader.u16ProductListSize, NULL, NULL);
+	WriteFile(hFile, lpProductList, hwHeader.PacketHeader.u16ProductListSize, &dwTmp, NULL);
 	dwOffset += hwHeader.PacketHeader.u16ProductListSize;
 
 	//写入项目信息
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount ; u32Index++)
 	{
 		SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
-		WriteFile(hFile, &lpItemCopy[u32Index].ItemInfo, sizeof(HWNP_ITEMINFO), NULL, NULL);
+		WriteFile(hFile, &lpItemCopy[u32Index].ItemInfo, sizeof(HWNP_ITEMINFO), &dwTmp, NULL);
 		dwOffset += sizeof(HWNP_ITEMINFO);
 	}
 
@@ -606,7 +608,7 @@ int HWNP_Save()
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 	{
 		SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
-		WriteFile(hFile, &lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, NULL, NULL);
+		WriteFile(hFile, &lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, &dwTmp, NULL);
 		dwOffset += lpItemCopy[u32Index].u32DataSize;
 	}
 
@@ -619,7 +621,7 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
 
 	HANDLE hNewFile;
 	uint32_t u32FileSize, u32DataSize = 0;
-	DWORD dwOffset = 0;
+	DWORD dwOffset = 0, dwTmp;
 
 	hNewFile = CreateFileW(lpFilePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hNewFile == INVALID_HANDLE_VALUE) return (nLastError = -1402);
@@ -635,18 +637,18 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
 	SetEndOfFile(hNewFile);
 
 	SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
-	WriteFile(hNewFile, &hwHeader, sizeof(HWNP_HEADER), NULL, NULL);
+	WriteFile(hNewFile, &hwHeader, sizeof(HWNP_HEADER), &dwTmp, NULL);
 	dwOffset += sizeof(HWNP_HEADER);
 
 	SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
-	WriteFile(hNewFile, lpProductList, hwHeader.PacketHeader.u16ProductListSize, NULL, NULL);
+	WriteFile(hNewFile, lpProductList, hwHeader.PacketHeader.u16ProductListSize, &dwTmp, NULL);
 	dwOffset += hwHeader.PacketHeader.u16ProductListSize;
 
 	//写入项目信息
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 	{
 		SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
-		WriteFile(hNewFile, &lpItemCopy[u32Index].ItemInfo, sizeof(HWNP_ITEMINFO), NULL, NULL);
+		WriteFile(hNewFile, &lpItemCopy[u32Index].ItemInfo, sizeof(HWNP_ITEMINFO), &dwTmp, NULL);
 		dwOffset += sizeof(HWNP_ITEMINFO);
 	}
 
@@ -654,7 +656,7 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 	{
 		SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
-		WriteFile(hNewFile, &lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, NULL, NULL);
+		WriteFile(hNewFile, &lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, &dwTmp, NULL);
 		dwOffset += lpItemCopy[u32Index].u32DataSize;
 	}
 
