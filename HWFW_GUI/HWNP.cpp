@@ -512,7 +512,7 @@ int HWNP_AddItem(__in uint32_t u32Id, __in LPCVOID lpNewData, __in uint32_t u32D
 	lpNewItemCopy[u32ItemCount].u32DataSize = u32DataSize;
 
 	lpNewItemCopy[u32ItemCount].ItemInfo.u32Id = u32Id;
-	lpNewItemCopy[u32ItemCount].ItemInfo.u32ItemCRC32 = crc32_fast(lpNewData, u32DataSize);
+	lpNewItemCopy[u32ItemCount].ItemInfo.u32ItemCRC32 = 0;
 	lpNewItemCopy[u32ItemCount].ItemInfo.u32Offset = 0;
 	lpNewItemCopy[u32ItemCount].ItemInfo.u32Size = u32DataSize;
 	strcpy_s(lpNewItemCopy[u32ItemCount].ItemInfo.chItemPath, sizeof(HWNP_ITEMINFO::chItemPath), lpchPath);
@@ -581,14 +581,18 @@ int HWNP_Save()
 
 	HWNP_Update();
 
+	//计算数据大小
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 		u32DataSize += lpItemCopy[u32Index].u32DataSize;
 
+	//计算文件大小
 	u32FileSize = sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO) + u32DataSize;
 
+	//重设文件大小
 	SetFilePointer(hFile, u32FileSize, NULL, FILE_BEGIN);
 	SetEndOfFile(hFile);
 
+	//写入头部
 	SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
 	WriteFile(hFile, &hwHeader, sizeof(HWNP_HEADER), &dwTmp, NULL);
 	dwOffset += sizeof(HWNP_HEADER);
@@ -609,7 +613,7 @@ int HWNP_Save()
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 	{
 		SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
-		WriteFile(hFile, &lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, &dwTmp, NULL);
+		WriteFile(hFile, lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, &dwTmp, NULL);
 		dwOffset += lpItemCopy[u32Index].u32DataSize;
 	}
 
@@ -629,14 +633,18 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
 
 	HWNP_Update();
 
+	//计算数据大小
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 		u32DataSize += lpItemCopy[u32Index].u32DataSize;
 
+	//计算文件大小
 	u32FileSize = sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO) + u32DataSize;
 
+	//重设文件大小
 	SetFilePointer(hNewFile, u32FileSize, NULL, FILE_BEGIN);
 	SetEndOfFile(hNewFile);
 
+	//写入头部
 	SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
 	WriteFile(hNewFile, &hwHeader, sizeof(HWNP_HEADER), &dwTmp, NULL);
 	dwOffset += sizeof(HWNP_HEADER);
@@ -657,7 +665,7 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 	{
 		SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
-		WriteFile(hNewFile, &lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, &dwTmp, NULL);
+		WriteFile(hNewFile, lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize, &dwTmp, NULL);
 		dwOffset += lpItemCopy[u32Index].u32DataSize;
 	}
 
