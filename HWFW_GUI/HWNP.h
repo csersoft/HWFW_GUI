@@ -46,6 +46,8 @@ https://github.com/LeeXiaolan/hwfw-tool
 #define IIFLAG_VERSION																		0x00000008U
 #define IIFLAG_POLICY																			0x00000010U
 #define IIFLAG_RESERVED																		0x00000020U
+#define IIFLAG_ALL																				(IIFLAG_ID | IIFLAG_PATH | IIFLAG_TYPE | IIFLAG_VERSION | IIFLAG_POLICY | IIFLAG_RESERVED)
+
 
 #define CHKCRC_OK																					0
 #define CHKCRC_FAILED																			11

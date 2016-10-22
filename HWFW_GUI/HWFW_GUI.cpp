@@ -85,6 +85,35 @@ void SetDialogStatus(HWND hCtrl, LPCWSTR lpText, ...)
 	SetWindowTextW(hCtrl, wsTmp);
 }
 
+inline DWORD ScanfDec(LPCCH lpString)
+{
+	if (lpString == NULL) return 0;
+
+	DWORD dwDec;
+
+	sscanf_s(lpString, "%u", &dwDec);
+
+	return dwDec;
+}
+
+inline DWORD ScanfHex(LPCCH lpString)
+{
+	if (lpString == NULL) return 0;
+
+	DWORD dwHex;
+
+	if (_strnicmp(lpString, "0x", 2) == 0)
+	{
+		sscanf_s(lpString, "0x%X", &dwHex);
+	}
+	else
+	{
+		sscanf_s(lpString, "%X", &dwHex);
+	}
+
+	return dwHex;
+}
+
 BOOL QueryMsg(HWND hOwner, LPCWSTR szText, LPCWSTR szTitle)
 {
 	if (MessageBox(hOwner, szText, szTitle, MB_ICONQUESTION | MB_YESNO) == IDYES)
@@ -347,6 +376,7 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 			break;
 
 			case IDM_EXIT:
+			HWNP_Release();
 			EndDialog(hDlg, 0);
 			break;
 
@@ -495,6 +525,7 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	break;
 
 	case WM_CLOSE:
+	HWNP_Release();
 	EndDialog(hDlg, IDCLOSE);
 	break;
 
@@ -700,13 +731,60 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			break;
 
 			case IDOK:
-			if (lpDlgIIS->dtType == DT_EDIT)
 			{
+				int nResult = 0;
+				CHAR chTmp[MAX_PATH] = { 0 };
 
-			}
-			else
-			{
+				GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_ID), chTmp, MAX_PATH);
+				if (strlen(chTmp) != 0) hwItemInfo.u32Id = ScanfDec(chTmp);
 
+				GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_PATH), chTmp, MAX_PATH);
+				if (strlen(chTmp) != 0) strcpy_s(hwItemInfo.chItemPath, chTmp);
+
+				GetWindowTextA(GetDlgItem(hDlg, IDC_CB_TYPE), chTmp, MAX_PATH);
+				if (strlen(chTmp) != 0) strcpy_s(hwItemInfo.chItemType, chTmp);
+
+				GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_VER), chTmp, MAX_PATH);
+				if (strlen(chTmp) != 0) strcpy_s(hwItemInfo.chItemVersion, chTmp);
+
+				GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_POLICY), chTmp, MAX_PATH);
+				if (strlen(chTmp) != 0) hwItemInfo.u32Policy = ScanfHex(chTmp);
+
+				GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UNKDAT), chTmp, MAX_PATH);
+				if (strlen(chTmp) != 0) hwItemInfo.u32Reserved = ScanfHex(chTmp);
+
+				if (lpDlgIIS->dtType == DT_EDIT)
+				{
+					nResult = HWNP_SetItemInfo(lpDlgIIS->u32Index, IIFLAG_ALL, hwItemInfo.u32Id, hwItemInfo.chItemPath, hwItemInfo.chItemType,
+						hwItemInfo.chItemVersion, hwItemInfo.u32Policy, hwItemInfo.u32Reserved);
+				}
+				else if (lpDlgIIS->dtType == DT_ADD) 
+				{
+					DWORD dwSize;
+					LPVOID lpData;
+
+					if (ImportFromFile(lpDlgIIS->lpFile, &lpData, &dwSize) == FALSE)
+					{
+						SetDialogStatus(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导入文件失败!");
+						break;
+					}
+
+					nResult = HWNP_AddItem(hwItemInfo.u32Id, lpData, dwSize, hwItemInfo.chItemPath, hwItemInfo.chItemType,
+						hwItemInfo.chItemVersion, hwItemInfo.u32Policy, hwItemInfo.u32Reserved);
+
+					free(lpData);
+				}
+
+
+				if (nResult == 0)
+				{
+					HWNP_Update();
+					EndDialog(hDlg, IDOK);
+				}
+				else
+				{
+					SetDialogStatus(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"保存项目信息失败,错误码:[%d]!", nResult);
+				}
 			}
 			break;
 

@@ -17,6 +17,7 @@
 
 // C 运行时头文件
 #include <stdint.h>
+#include <stdio.h> 
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
