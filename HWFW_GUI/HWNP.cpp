@@ -50,7 +50,7 @@ static inline void HWNP_UpdateHeader()
 	if (nState != -1) return;
 
 	uint32_t u32DataSize = 0;
-	uint32_t u32CRC;
+	uint32_t u32CRC, u32Tmp;
 
 	for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
 		u32DataSize += lpItemCopy[u32Index].u32DataSize;
@@ -74,7 +74,8 @@ static inline void HWNP_UpdateHeader()
 	hwHeader.FileHeader2.u32HeaderCRC32 = u32CRC;
 
 	//计算文件大小
-	hwHeader.BasicFileHeader.beu32FileSize = BigLittleSwap32((sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO)) - 76);
+	u32Tmp = (sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO) + u32DataSize) - 76;
+	hwHeader.BasicFileHeader.beu32FileSize = BigLittleSwap32(u32Tmp);
 
 	//计算文件CRC
 	u32CRC = crc32_fast(&hwHeader.FileHeader2, sizeof(HWNP_FILEHDR2));

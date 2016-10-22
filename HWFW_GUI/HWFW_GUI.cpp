@@ -775,7 +775,6 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					free(lpData);
 				}
 
-
 				if (nResult == 0)
 				{
 					HWNP_Update();
