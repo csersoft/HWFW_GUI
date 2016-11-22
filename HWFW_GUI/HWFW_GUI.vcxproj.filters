@@ -13,9 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Licenses">
+      <UniqueIdentifier>{965257a6-d86a-41cd-9627-7370962de6aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="Licenses\gpl-3.0.txt">
+      <Filter>Licenses</Filter>
+    </Text>
+    <Text Include="Licenses\gpl-3.0-cht.txt">
+      <Filter>Licenses</Filter>
+    </Text>
+    <Text Include="Licenses\gpl-3.0-chs.txt">
+      <Filter>Licenses</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

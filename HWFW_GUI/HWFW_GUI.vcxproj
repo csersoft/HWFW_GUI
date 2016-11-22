@@ -234,6 +234,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="Licenses\gpl-3.0-chs.txt" />
+    <Text Include="Licenses\gpl-3.0-cht.txt" />
+    <Text Include="Licenses\gpl-3.0.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
