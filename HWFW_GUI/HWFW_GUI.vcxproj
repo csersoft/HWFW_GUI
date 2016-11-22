@@ -242,8 +242,13 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="uboot_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Dlg_About.cpp" />
+    <ClCompile Include="Dlg_AdvDatFmt.cpp" />
+    <ClCompile Include="Dlg_ItemInfo.cpp" />
+    <ClCompile Include="Dlg_Main.cpp" />
     <ClCompile Include="FastCRC32.cpp">
       <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Speed</FavorSizeOrSpeed>
       <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release_LLVM|Win32'">Speed</FavorSizeOrSpeed>

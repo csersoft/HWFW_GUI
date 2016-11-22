@@ -20,6 +20,8 @@
 #include <WinBase.h>
 #endif
 
+#include "uboot_image.h"
+
 /*
 参考:
 http://blog.leexiaolan.tk/pwn-huawei-hg8120c-ont-via-maintenance-tool-part-2
@@ -142,6 +144,27 @@ typedef struct _HWNP_ItemInfo
 	uint32_t									u32Policy;
 	uint32_t									u32Reserved;
 } HWNP_ITEMINFO, *PHWNP_ITEMINFO;
+
+
+enum _WHHDR_ItemType : uint32_t
+{
+	whType_Kernel = 1U,
+	whType_RootFS,
+	whType_System,
+	whType_MiniSYS
+};
+
+typedef struct _WHWH_Header
+{
+	//魔法字
+	uint32_t									u32Magic;
+	char											chItemVersion[64];
+	__time32_t								u32Time;
+	_WHHDR_ItemType						enumType;
+	uint32_t									u32RearSize;
+	uint32_t									u32RearCRC;
+} WHWH_HEADER, *PWHWH_HEADER;
+
 
 
 //内存文件是否已更改
