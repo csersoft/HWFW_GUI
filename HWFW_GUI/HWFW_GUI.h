@@ -16,85 +16,85 @@ extern HWND hMainDlg;
 extern HMENU hmPop;
 extern HMENU hmItemInfo;
 
-INT_PTR CALLBACK		DlgProc_Main(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK		DlgProc_ItemInfo(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK		DlgProc_About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK    DlgProc_Main(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    DlgProc_ItemInfo(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    DlgProc_AdvDatFmt(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    DlgProc_About(HWND, UINT, WPARAM, LPARAM);
 
 enum TVI_TYPE : unsigned int
 {
-	TT_NONE,
-	TT_FILEHDR,
-	TT_MODELINFO,
-	TT_ITEMINFO,
-	TT_RAWDATA
+  TT_NONE,
+  TT_FILEHDR,               //file header
+  TT_MODELINFO,             //Model info (product list)
+  TT_ITEMINFO,              //item info
+  TT_RAWDATA
 };
 
 enum LVI_TYPE : unsigned int
 {
-	LT_NONE,
-	LT_MODELINFO,
-	LT_ITEMINFO
+  LT_NONE,
+  LT_MODELINFO,
+  LT_ITEMINFO
 };
 
 enum DLGII_TYPE : unsigned int
 {
-	DT_NONE,
-	DT_ADD,
-	DT_EDIT
+  DT_NONE,
+  DT_ADD,
+  DT_EDIT
 };
 
 typedef struct _LISTVIEW_STRUCT
 {
-	LVI_TYPE						ltType;
-	DWORD								dwFlags;
-	DWORD								dwUserData;
-	LPARAM							lParam;
+  LVI_TYPE            ltType;
+  DWORD               dwFlags;
+  DWORD               dwUserData;
+  LPARAM              lParam;
 } LVS, *PLVS;
-
 
 typedef struct _DIALOG_ITEMINFO_STRUCT
 {
-	DLGII_TYPE					dtType;
-	uint32_t						u32Index;
-	PWCHAR							lpFile;
+  DLGII_TYPE          dtType;
+  uint32_t            u32Index;
+  PWCHAR              lpFile;
 } DLGIIS, *PDLGIIS;
 
 
 static inline BOOL ScreenToClient(
-	__in HWND hWnd,
-	__inout LPRECT lpRect)
+  __in HWND hWnd,
+  __inout LPRECT lpRect)
 {
-	ScreenToClient(hWnd, (LPPOINT)lpRect);
-	return ScreenToClient(hWnd, (LPPOINT)&(lpRect->right));
+  ScreenToClient(hWnd, (LPPOINT)lpRect);
+  return ScreenToClient(hWnd, (LPPOINT)&(lpRect->right));
 }
 
 static inline DWORD ScanfDec(LPCCH lpString)
 {
-	if (lpString == NULL) return 0;
+  if (lpString == NULL) return 0;
 
-	DWORD dwDec;
+  DWORD dwDec;
 
-	sscanf_s(lpString, "%u", &dwDec);
+  sscanf_s(lpString, "%u", &dwDec);
 
-	return dwDec;
+  return dwDec;
 }
 
 static inline DWORD ScanfHex(LPCCH lpString)
 {
-	if (lpString == NULL) return 0;
+  if (lpString == NULL) return 0;
 
-	DWORD dwHex;
+  DWORD dwHex;
 
-	if (_strnicmp(lpString, "0x", 2) == 0)
-	{
-		sscanf_s(lpString, "0x%X", &dwHex);
-	}
-	else
-	{
-		sscanf_s(lpString, "%X", &dwHex);
-	}
+  if (_strnicmp(lpString, "0x", 2) == 0)
+  {
+    sscanf_s(lpString, "0x%X", &dwHex);
+  }
+  else
+  {
+    sscanf_s(lpString, "%X", &dwHex);
+  }
 
-	return dwHex;
+  return dwHex;
 }
 
 void SetStatus(LPCWSTR lpText, ...);
