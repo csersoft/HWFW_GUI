@@ -9,6 +9,7 @@ HuaWei Router Firmware Editor - GUI
 - 增加高级数据格式的编辑功能
 - 细节修复
 - 代码缩进优化
+<<<<<<< HEAD
 
 
 License
@@ -28,3 +29,5 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+=======
+>>>>>>> 06fb83399f0d18d307f76d2e1d1130fe7f1da783
