@@ -25,6 +25,11 @@
 #include <tchar.h>
 #include <time.h>
 
+#define APP_NAME                L"HWFW_GUI"
+#define APP_VER1                L"1.0.3"
+#define APP_VER2                L"Alpha"
+#define APP_BUILD_VER           L"003"
+
 
 #if defined _M_IX86
 #pragma comment(linker,"/manifestdependency:\"type='win32'   name='Microsoft.Windows.Common-Controls'   version='6.0.0.0'   processorArchitecture='x86'   publicKeyToken='6595b64144ccf1df'   language='*'\"")

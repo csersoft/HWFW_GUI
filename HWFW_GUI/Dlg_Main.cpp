@@ -49,10 +49,14 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     lngLbl_w_diff = rcDlg.right - (rcTmp.right - rcTmp.left);
     lngLbl_h = rcTmp.bottom - rcTmp.top;
 
+    swprintf_s(wsPath, L"%s  %s  %s  Build:%s", APP_NAME, APP_VER1, APP_VER2, APP_BUILD_VER);
+    SetWindowTextW(hDlg, wsPath);
+
     wcscpy_s(wsPath, L"firmware.bin");
 
     SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_HWFW_GUI)));
     SendMessage(hDlg, WM_SETICON, ICON_BIG, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_HWFW_GUI)));
+
   }
   return (INT_PTR)TRUE;
 

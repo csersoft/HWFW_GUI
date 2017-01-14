@@ -30,6 +30,7 @@ static void Release()
 
 static void EnableWindow_UBootGroup(HWND hDlg, BOOL blEnable)
 {
+  EnableWindow(GetDlgItem(hDlg, IDC_EDIT_UBHDRCRC), blEnable);
   EnableWindow(GetDlgItem(hDlg, IDC_EDIT_UBDATCRC), blEnable);
   EnableWindow(GetDlgItem(hDlg, IDC_EDIT_UBSIZE), blEnable);
   EnableWindow(GetDlgItem(hDlg, IDC_EDIT_UBTIME), blEnable);
@@ -140,6 +141,12 @@ static BOOL UpdateView(HWND hDlg)
 
     if (hdrWHWH.u32Magic != HWNP_WHWH_MAGIC) return FALSE;
 
+    if (u32DataSize < sizeof(WHWH_HDR) + hdrWHWH.u32RearSize)
+    {
+      MessageBoxW(hDlg, L"WHWH数据长度大于项目数据长度!", L"错误", MB_ICONERROR | MB_OK);
+      return FALSE;
+    }
+
     lpData_WHWH = malloc(hdrWHWH.u32RearSize);
     if (lpData_WHWH == NULL) return FALSE;
     memcpy_s(lpData_WHWH, hdrWHWH.u32RearSize, MakePointer32(lpItemData, sizeof(WHWH_HDR)), hdrWHWH.u32RearSize);
@@ -150,7 +157,17 @@ static BOOL UpdateView(HWND hDlg)
     hdrUIMG = *(PUIMG_HDR)(lpData_WHWH);
 
     if (hdrUIMG.ih_magic == IH_MAGIC_LE)
-      blUIMG = TRUE;
+    {
+      if (u32DataSize - (sizeof(WHWH_HDR) + sizeof(UIMG_HDR)) >= BigLittleSwap32(hdrUIMG.ih_size))
+      {
+        blUIMG = TRUE;
+      }
+      else
+      {
+        blUIMG = FALSE;
+        MessageBoxW(hDlg, L"UIMG数据长度大于项目数据长度!", L"警告", MB_ICONWARNING | MB_OK);
+      }
+    }
     else
       blUIMG = FALSE;
   }
@@ -238,10 +255,12 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
     {
       u32ItemIdx = (uint32_t)lParam;
 
+      /*
       if (CHK_FLAGS(dwType, IDT_UBOOT))
         blUIMG = TRUE;
       else
         blUIMG = FALSE;
+        */
 
       SNDMSG(GetDlgItem(hDlg, IDC_EDIT_WHVER), EM_SETLIMITTEXT, sizeof(WHWH_HEADER::chItemVersion), 0);
       SNDMSG(GetDlgItem(hDlg, IDC_EDIT_WHTIME), EM_SETLIMITTEXT, 10, 0);
@@ -279,6 +298,8 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       if (UpdateView(hDlg) == FALSE)
       {
         Release();
+        MessageBoxW(hDlg, L"解析高级数据结构出现错误!", L"警告", MB_ICONWARNING | MB_OK);
+        EndDialog(hDlg, 0);
         return (INT_PTR)FALSE;
       }
 
