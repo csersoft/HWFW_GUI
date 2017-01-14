@@ -6,9 +6,9 @@ HuaWei Router Firmware Editor - GUI
 ![PREVIEW](./Screenshots/SS_1.0.3_3.png)
 
 ### 1.0.3 Alpha Build 003
-- Ôö¼Ó¸ß¼¶Êı¾İ¸ñÊ½µÄ±à¼­¹¦ÄÜ
-- Ï¸½ÚĞŞ¸´
-- ´úÂëËõ½øÓÅ»¯
+- å¢åŠ é«˜çº§æ•°æ®æ ¼å¼çš„ç¼–è¾‘åŠŸèƒ½
+- ç»†èŠ‚ä¿®å¤
+- ä»£ç ç¼©è¿›ä¼˜åŒ–
 
 
 License
@@ -28,4 +28,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-=======
