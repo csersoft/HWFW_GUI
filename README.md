@@ -5,6 +5,11 @@ HuaWei Router Firmware Editor - GUI
 ![PREVIEW](./Screenshots/SS_1.0.3_2.png)
 ![PREVIEW](./Screenshots/SS_1.0.3_3.png)
 
+Updates
+-------
+
+### 1.0.4 Alpha Build 001
+- 增加浏览支持的产品型号功能
 ### 1.0.3 Alpha Build 003
 - 增加高级数据格式的编辑功能
 - 细节修复
