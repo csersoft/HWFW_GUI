@@ -1,6 +1,8 @@
 ﻿#include "stdafx.h"
 #include "HWFW_GUI.h"
 
+CHAR chIniPath[MAX_PATH] = { 0 };
+
 // 主窗口的消息处理程序。
 INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -15,6 +17,7 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   case WM_INITDIALOG:
   {
     RECT rcDlg, rcTmp, rcTmp2;
+    LPCH lpStr;
 
     hMainDlg = hDlg;
 
@@ -57,6 +60,14 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_HWFW_GUI)));
     SendMessage(hDlg, WM_SETICON, ICON_BIG, (LPARAM)LoadIcon(hInst, MAKEINTRESOURCE(IDI_HWFW_GUI)));
 
+    GetModuleFileNameA(NULL, chIniPath, MAX_PATH);
+    lpStr = strrchr(chIniPath, '\\');
+
+    if (lpStr)
+    {
+      lpStr++;
+      strcpy_s(lpStr, MAX_PATH - (lpStr - chIniPath), "HWPDB.ini");
+    }
   }
   return (INT_PTR)TRUE;
 

@@ -26,9 +26,9 @@
 #include <time.h>
 
 #define APP_NAME                L"HWFW_GUI"
-#define APP_VER1                L"1.0.3"
+#define APP_VER1                L"1.0.4"
 #define APP_VER2                L"Alpha"
-#define APP_BUILD_VER           L"003"
+#define APP_BUILD_VER           L"001"
 
 
 #if defined _M_IX86
@@ -51,9 +51,14 @@
 #define TreeView_DlgSetItemW(hwnd, item, pitem) \
   (BOOL)::SendDlgItemMessageW((hwnd), (int)(item), TVM_SETITEMW, 0, (LPARAM)(const TVITEMW *)(pitem))
 
+#define ListView_InsertItemA(hwnd, pitem)   \
+  (int)::SendMessageA((hwnd), LVM_INSERTITEMA, 0, (LPARAM)(pitem))
 
 #define ListView_InsertItemW(hwnd, pitem)   \
   (int)::SendMessageW((hwnd), LVM_INSERTITEMW, 0, (LPARAM)(pitem))
+
+#define ListView_SetItemA(hwnd, pitem) \
+  (BOOL)::SendMessageA((hwnd), LVM_SETITEMA, 0, (LPARAM)(pitem))
 
 #define ListView_SetItemW(hwnd, pitem) \
   (BOOL)::SendMessageW((hwnd), LVM_SETITEMW, 0, (LPARAM)(pitem))

@@ -136,6 +136,9 @@
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
+    <PostBuildEvent>
+      <Command>copy HWPDB.ini "$(OutDir)HWPDB.ini"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -172,6 +175,9 @@
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
+    <PostBuildEvent>
+      <Command>copy HWPDB.ini "$(OutDir)HWPDB.ini"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_LLVM|Win32'">
     <ClCompile>
@@ -192,6 +198,9 @@
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
+    <PostBuildEvent>
+      <Command>copy HWPDB.ini "$(OutDir)HWPDB.ini"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -282,6 +291,9 @@
   <ItemGroup>
     <Image Include="HWFW_GUI.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HWPDB.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

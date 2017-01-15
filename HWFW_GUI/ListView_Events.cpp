@@ -71,7 +71,42 @@ int ListView_AddColumn(HWND hCtrl, int nWidth, int nIndex, LPWSTR lpText)
   return ListView_InsertColumnW(hCtrl, nIndex, &lvc);
 }
 
-int ListView_AddItem(HWND hCtrl, int iItem, int iSubItem, LPWSTR lpText, LVI_TYPE ltType, DWORD dwFlags, DWORD dwUserData, LPARAM lParam)
+int ListView_AddItemA(HWND hCtrl, int iItem, int iSubItem, LPSTR lpText, LVI_TYPE ltType, DWORD dwFlags, DWORD dwUserData, LPARAM lParam)
+{
+  LVITEMA lvi;
+  int nResult;
+
+  ZeroMemory(&lvi, sizeof(LVITEMA));
+
+  lvi.iItem = iItem;
+  lvi.iSubItem = iSubItem;
+  lvi.pszText = lpText;
+
+  if (iSubItem == 0)
+  {
+    PLVS lpLVS = (PLVS)calloc(1, sizeof(LVS));
+
+    if (!lpLVS) return -1;
+
+    lpLVS->ltType = ltType;
+    lpLVS->dwFlags = dwFlags;
+    lpLVS->dwUserData = dwUserData;
+    lpLVS->lParam = lParam;
+
+    lvi.lParam = (LPARAM)lpLVS;
+    lvi.mask = LVIF_TEXT | LVIF_PARAM;
+    nResult = ListView_InsertItemA(hCtrl, &lvi);
+  }
+  else
+  {
+    lvi.mask = LVIF_TEXT;
+    nResult = ListView_SetItemA(hCtrl, &lvi);
+  }
+
+  return nResult;
+}
+
+int ListView_AddItemW(HWND hCtrl, int iItem, int iSubItem, LPWSTR lpText, LVI_TYPE ltType, DWORD dwFlags, DWORD dwUserData, LPARAM lParam)
 {
   LVITEMW lvi;
   int nResult;

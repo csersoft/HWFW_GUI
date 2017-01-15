@@ -5,7 +5,9 @@
 
 static WNDPROC wfnTV = NULL;
 
-void ListFileHeader(HWND hListView)
+extern CHAR chIniPath[MAX_PATH];
+
+static void ListFileHeader(HWND hListView)
 {
   int nIndex = 0;
   HWNP_HEADER fwHeader;      //firmware header
@@ -24,80 +26,135 @@ void ListFileHeader(HWND hListView)
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, BasicFileHeader.u32Magic));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX, fwHeader.BasicFileHeader.u32Magic);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"Magic            #  魔法签名  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"Magic            #  魔法签名  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, BasicFileHeader.beu32FileSize));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX_DEC, BigLittleSwap32(fwHeader.BasicFileHeader.beu32FileSize), BigLittleSwap32(fwHeader.BasicFileHeader.beu32FileSize));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"FileSize         #  文件大小  (Big-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"FileSize         #  文件大小  (Big-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, BasicFileHeader.u32FileCRC32));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX, fwHeader.BasicFileHeader.u32FileCRC32);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"FileCRC32        #  文件CRC32  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"FileCRC32        #  文件CRC32  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, FileHeader2.u32HeaderSize));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX_DEC, fwHeader.FileHeader2.u32HeaderSize, fwHeader.FileHeader2.u32HeaderSize);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"HeaderSize       #  头部大小  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"HeaderSize       #  头部大小  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, FileHeader2.u32HeaderCRC32));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX, fwHeader.FileHeader2.u32HeaderCRC32);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"HeaderCRC32      #  头部CRC32  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"HeaderCRC32      #  头部CRC32  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u32ItemCount));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX_DEC, fwHeader.PacketHeader.u32ItemCount, fwHeader.PacketHeader.u32ItemCount);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"ItemCount        #  项目信息计数  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"ItemCount        #  项目信息计数  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u8PackTotal));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX8, LOBYTE(fwHeader.PacketHeader.u8PackTotal));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"PackTotal        #  PackTotal  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"PackTotal        #  PackTotal  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u8PackNum));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX8, LOBYTE(fwHeader.PacketHeader.u8PackNum));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"PackNum          #  PackNum  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"PackNum          #  PackNum  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u16ProductListSize));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX_DEC16, fwHeader.PacketHeader.u16ProductListSize, fwHeader.PacketHeader.u16ProductListSize);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"ProductListSize  #  产品支持列表大小  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"ProductListSize  #  产品支持列表大小  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u16ItemInfoSize));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX_DEC16, fwHeader.PacketHeader.u16ItemInfoSize, fwHeader.PacketHeader.u16ItemInfoSize);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"ItemSize         #  项目信息大小  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"ItemSize         #  项目信息大小  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u32Reserved));
-  ListView_AddItem(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX_DEC, fwHeader.PacketHeader.u32Reserved, fwHeader.PacketHeader.u32Reserved);
-  ListView_AddItem(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItem(hListView, ItemIndexPlus(nIndex), 2, L"Reserved         #  保留  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"Reserved         #  保留  (Little-Endian)", LT_NONE, 0, 0, 0);
+}
+
+static void ListProductInfo(HWND hListView)
+{
+  int nIndex = 0;
+  LPCH lpProdList, lpStr, lpEndStr, lpTmp;
+  uint16_t u16Size = 0;
+  CHAR chTmp[256], chTmp2[256];
+
+  DragAcceptFiles(hListView, FALSE);
+  ListView_SetView(hListView, LV_VIEW_DETAILS);
+  ListView_SetExtendedListViewStyle(hListView, LVS_EX_DEFAULT);
+
+
+  ListView_AddColumn(hListView, 96, 0, L"产品标识");
+  ListView_AddColumn(hListView, 256, 1, L"匹配的产品名称");
+
+  HWNP_GetProductListSize(&u16Size);
+
+  if (u16Size == 0) return;
+  
+  u16Size += 4;
+  lpProdList = (LPCH)calloc(u16Size, sizeof(CHAR));
+
+  if (lpProdList == NULL) return;
+
+  HWNP_GetProductList(lpProdList, u16Size);
+
+  lpStr = lpProdList;
+
+  while (*lpStr != 0)
+  {
+    if (*lpStr == '|')
+    {
+      lpStr++;
+      continue;
+    }
+
+    lpEndStr = strchr(lpStr, '|');
+
+    if (lpEndStr == NULL) break;
+
+    strncpy_s(chTmp, lpStr, lpEndStr - lpStr);
+
+    lpTmp = chTmp;
+    while (*lpTmp == ';') lpTmp++;
+    
+    GetPrivateProfileStringA("HW_ProductDatabase", lpTmp, "< N/A >", chTmp2, sizeof(chTmp2), chIniPath);
+
+    ListView_AddItemA(hListView, ItemIndex(nIndex), 0, chTmp, LT_MODELINFO, 0, 0, 0);
+    ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, chTmp2, LT_MODELINFO, 0, 0, 0);
+    lpStr = lpEndStr + 1;
+  }
+
+  free(lpProdList);
 }
 
 void ListItemInfo(HWND hListView)
@@ -139,46 +196,46 @@ void ListItemInfo(HWND hListView)
     size_t stOut;
 
     swprintf_s(wsTemp, SF_HEX, sizeof(HWNP_HEADER) + hwPakHdr.PacketHeader.u16ProductListSize + u32Index * sizeof(HWNP_ITEMINFO));
-    ListView_AddItem(hListView, u32Index, 0, wsTemp, LT_ITEMINFO, 0, u32Index, 0);
+    ListView_AddItemW(hListView, u32Index, 0, wsTemp, LT_ITEMINFO, 0, u32Index, 0);
 
     if (HWNP_GetItemInfoByIndex(u32Index, &hwItemInfo) != 0) continue;
 
     swprintf_s(wsTemp, SF_DEC, hwItemInfo.u32Id);
-    ListView_AddItem(hListView, u32Index, 1, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 1, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemPath, sizeof(HWNP_ITEMINFO::chItemPath));
-    ListView_AddItem(hListView, u32Index, 2, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 2, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Policy);
-    ListView_AddItem(hListView, u32Index, 3, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 3, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32ItemCRC32);
-    ListView_AddItem(hListView, u32Index, 4, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 4, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
 #if LV_CFG_SHOW_DATAINFO
     swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Offset);
-    ListView_AddItem(hListView, u32Index, 5, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 5, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     swprintf_s(wsTemp, SF_HEX_DEC, hwItemInfo.u32Size, hwItemInfo.u32Size);
-    ListView_AddItem(hListView, u32Index, 6, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 6, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemType, sizeof(HWNP_ITEMINFO::chItemType));
-    ListView_AddItem(hListView, u32Index, 7, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 7, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemVersion, sizeof(HWNP_ITEMINFO::chItemVersion));
-    ListView_AddItem(hListView, u32Index, 8, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 8, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Reserved);
-    ListView_AddItem(hListView, u32Index, 9, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 9, wsTemp, LT_ITEMINFO, 0, 0, 0);
 #else
     mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemType, sizeof(HWNP_ITEMINFO::chItemType));
-    ListView_AddItem(hListView, u32Index, 5, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 5, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemVersion, sizeof(HWNP_ITEMINFO::chItemVersion));
-    ListView_AddItem(hListView, u32Index, 6, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 6, wsTemp, LT_ITEMINFO, 0, 0, 0);
 
     swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Reserved);
-    ListView_AddItem(hListView, u32Index, 7, wsTemp, LT_ITEMINFO, 0, 0, 0);
+    ListView_AddItemW(hListView, u32Index, 7, wsTemp, LT_ITEMINFO, 0, 0, 0);
 #endif
   }
 }
@@ -216,6 +273,10 @@ void TreeView_SelChanged(LPNMTREEVIEW lpnmTV)
   {
   case TT_FILEHDR:
   ListFileHeader(hListView);
+  break;
+
+  case TT_MODELINFO:
+  ListProductInfo(hListView);
   break;
 
   case TT_ITEMINFO:
