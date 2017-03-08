@@ -157,6 +157,7 @@ static void ListProductInfo(HWND hListView)
   free(lpProdList);
 }
 
+
 void ListItemInfo(HWND hListView)
 {
   //int nIndex = 0;
@@ -187,6 +188,67 @@ void ListItemInfo(HWND hListView)
   ListView_AddColumn(hListView, 90, 7, L"保留数据");
 #endif
 
+
+  if (HWNP_GetFirmwareHeader(&hwPakHdr) != 0) return;
+  if (HWNP_GetItemCount(&u32Count) != 0) return;
+
+  for (uint32_t u32Index = 0; u32Index < u32Count; u32Index++)
+  {
+    size_t stOut;
+
+    swprintf_s(wsTemp, SF_HEX, sizeof(HWNP_HEADER) + hwPakHdr.PacketHeader.u16ProductListSize + u32Index * sizeof(HWNP_ITEMINFO));
+    ListView_AddItemW(hListView, u32Index, 0, wsTemp, LT_ITEMINFO, 0, u32Index, 0);
+
+    if (HWNP_GetItemInfoByIndex(u32Index, &hwItemInfo) != 0) continue;
+
+    swprintf_s(wsTemp, SF_DEC, hwItemInfo.u32Id);
+    ListView_AddItemW(hListView, u32Index, 1, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemPath, sizeof(HWNP_ITEMINFO::chItemPath));
+    ListView_AddItemW(hListView, u32Index, 2, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Policy);
+    ListView_AddItemW(hListView, u32Index, 3, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32ItemCRC32);
+    ListView_AddItemW(hListView, u32Index, 4, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+#if LV_CFG_SHOW_DATAINFO
+    swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Offset);
+    ListView_AddItemW(hListView, u32Index, 5, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    swprintf_s(wsTemp, SF_HEX_DEC, hwItemInfo.u32Size, hwItemInfo.u32Size);
+    ListView_AddItemW(hListView, u32Index, 6, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemType, sizeof(HWNP_ITEMINFO::chItemType));
+    ListView_AddItemW(hListView, u32Index, 7, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemVersion, sizeof(HWNP_ITEMINFO::chItemVersion));
+    ListView_AddItemW(hListView, u32Index, 8, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Reserved);
+    ListView_AddItemW(hListView, u32Index, 9, wsTemp, LT_ITEMINFO, 0, 0, 0);
+#else
+    mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemType, sizeof(HWNP_ITEMINFO::chItemType));
+    ListView_AddItemW(hListView, u32Index, 5, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    mbstowcs_s(&stOut, wsTemp, hwItemInfo.chItemVersion, sizeof(HWNP_ITEMINFO::chItemVersion));
+    ListView_AddItemW(hListView, u32Index, 6, wsTemp, LT_ITEMINFO, 0, 0, 0);
+
+    swprintf_s(wsTemp, SF_HEX, hwItemInfo.u32Reserved);
+    ListView_AddItemW(hListView, u32Index, 7, wsTemp, LT_ITEMINFO, 0, 0, 0);
+#endif
+  }
+}
+
+void UpdateItemInfo(HWND hListView)
+{
+  uint32_t u32Count;
+  HWNP_HEADER hwPakHdr;
+  HWNP_ITEMINFO hwItemInfo;
+  WCHAR wsTemp[260];
+
+  ListView_DeleteAllItems(GetDlgItem(hMainDlg, IDC_LV));
 
   if (HWNP_GetFirmwareHeader(&hwPakHdr) != 0) return;
   if (HWNP_GetItemCount(&u32Count) != 0) return;

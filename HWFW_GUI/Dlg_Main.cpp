@@ -218,8 +218,8 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
           DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ITEMINFO), hDlg, &DlgProc_ItemInfo, (LPARAM)&dlgiis);
 
-          CleanListView();
-          ListItemInfo(GetDlgItem(hDlg, IDC_LV));
+          UpdateItemInfo(GetDlgItem(hDlg, IDC_LV));
+          ListView_SetItemState(GetDlgItem(hDlg, IDC_LV), nItem, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
         }
       }
       break;

@@ -115,6 +115,7 @@ void CleanView();
 void OpenFirmware(LPCWSTR lpPath);
 
 void ListItemInfo(HWND hListView);
+void UpdateItemInfo(HWND hListView);
 
 void TreeView_SetProc(HWND hCtrl);
 void TreeView_SelChanged(LPNMTREEVIEW lpnmTV);
