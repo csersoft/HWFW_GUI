@@ -148,6 +148,12 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
   }
   break;
 
+  case WM_SHOWWINDOW:
+  {
+    if ((wParam) && (lParam == SW_PARENTOPENING)) UpdateView(hDlg);
+  }
+  break;
+
   case WM_COMMAND:
   {
     WORD wId = LOWORD(wParam), wNc = HIWORD(wParam);

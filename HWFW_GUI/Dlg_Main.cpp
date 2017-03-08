@@ -86,7 +86,20 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         CleanView();
 
         if (GetOpenFilePath(hDlg, wsPath, MAX_PATH))
+        {
           OpenFirmware(wsPath);
+
+          LPWSTR lpFileName = wcsrchr(wsPath, '\\');
+          WCHAR wsTemp[MAX_PATH];
+
+          if (lpFileName)
+          {
+            lpFileName++;
+
+            swprintf_s(wsTemp, L"%s  %s  %s  Build:%s [%s]", APP_NAME, APP_VER1, APP_VER2, APP_BUILD_VER, lpFileName);
+            SetWindowTextW(hDlg, wsTemp);
+          }
+        }
         else
           SetStatus(L"获取文件路径失败!");
       }
@@ -204,6 +217,9 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
           }
 
           DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ITEMINFO), hDlg, &DlgProc_ItemInfo, (LPARAM)&dlgiis);
+
+          CleanListView();
+          ListItemInfo(GetDlgItem(hDlg, IDC_LV));
         }
       }
       break;

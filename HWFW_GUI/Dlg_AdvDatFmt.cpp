@@ -308,6 +308,12 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
   }
   break;
 
+  case WM_SHOWWINDOW:
+  {
+    if ((wParam) && (lParam == SW_PARENTOPENING)) UpdateView(hDlg);
+  }
+  break;
+
   case WM_COMMAND:
   {
     WORD wId = LOWORD(wParam), wNc = HIWORD(wParam);
