@@ -199,7 +199,8 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
             lvi.iSubItem = 0;
 
             ListView_GetItemW(GetDlgItem(hDlg, IDC_LV), &lvi);
-            dlgiis.u32Index = (uint32_t)((PLVS)lvi.lParam)->dwUserData;
+            if(lvi.lParam) dlgiis.u32Index = (uint32_t)((PLVS)lvi.lParam)->dwUserData;
+            else dlgiis.u32Index = 0;
           }
 
           DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ITEMINFO), hDlg, &DlgProc_ItemInfo, (LPARAM)&dlgiis);
