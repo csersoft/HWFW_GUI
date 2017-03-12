@@ -106,6 +106,7 @@ static void ListProductInfo(HWND hListView)
 {
   int nIndex = 0;
   LPCH lpProdList, lpStr, lpEndStr, lpTmp;
+  BOOL blInterface = FALSE;
   uint16_t u16Size = 0;
   CHAR chTmp[256], chTmp2[256];
 
@@ -143,14 +144,44 @@ static void ListProductInfo(HWND hListView)
     if (lpEndStr == NULL) break;
 
     strncpy_s(chTmp, lpStr, lpEndStr - lpStr);
-
     lpTmp = chTmp;
-    while (*lpTmp == ';') lpTmp++;
-    
-    GetPrivateProfileStringA("HW_ProductDatabase", lpTmp, "< N/A >", chTmp2, sizeof(chTmp2), chIniPath);
 
-    ListView_AddItemA(hListView, ItemIndex(nIndex), 0, chTmp, LT_MODELINFO, 0, 0, 0);
-    ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, chTmp2, LT_MODELINFO, 0, 0, 0);
+    if (*lpTmp == ';')
+    {
+      lpTmp++;
+
+      if (blInterface == FALSE)
+      {
+        blInterface = TRUE;
+
+        ListView_AddItemA(hListView, ItemIndex(nIndex), 0, ";;;", LT_MODELINFO, 0, 0, 0);
+        ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, ";;;  WEB Interface [WEB界面]  ;;;", LT_MODELINFO, 0, 0, 0);
+      }
+    }
+
+    if (blInterface)
+    {
+      ListView_AddItemA(hListView, ItemIndex(nIndex), 0, lpTmp, LT_MODELINFO, 0, 0, 0);
+
+      if (strcmp(lpTmp, "E8C") == 0)
+        ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, "中国电信界面 [China Telecom WEB Interface]", LT_MODELINFO, 0, 0, 0);
+      else if (strcmp(lpTmp, "COMMON") == 0)
+        ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, "华为原厂界面 [HuaWei WEB Interface]", LT_MODELINFO, 0, 0, 0);
+      else if (strcmp(lpTmp, "CHINA") == 0)
+        ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, "中国联通界面 [China Unicom WEB Interface]", LT_MODELINFO, 0, 0, 0);
+      else if (strcmp(lpTmp, "CMCC") == 0)
+        ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, "中国移动界面 [China Mobile WEB Interface]", LT_MODELINFO, 0, 0, 0);
+      else
+        ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, "未知界面 [Unknown Interface]", LT_MODELINFO, 0, 0, 0);
+    }
+    else
+    {
+      GetPrivateProfileStringA("HW_ProductDatabase", lpTmp, "< N/A >", chTmp2, sizeof(chTmp2), chIniPath);
+
+      ListView_AddItemA(hListView, ItemIndex(nIndex), 0, lpTmp, LT_MODELINFO, 0, 0, 0);
+      ListView_AddItemA(hListView, ItemIndexPlus(nIndex), 1, chTmp2, LT_MODELINFO, 0, 0, 0);
+    }
+
     lpStr = lpEndStr + 1;
   }
 
@@ -312,7 +343,20 @@ static LRESULT CALLBACK TreeView_WndProc(HWND hCtrl, UINT Msg, WPARAM wParam, LP
     WCHAR wsFile[MAX_PATH];
 
     if (DragQueryFile((HDROP)wParam, 0, wsFile, MAX_PATH))
+    {
       OpenFirmware(wsFile);
+
+      LPWSTR lpFileName = wcsrchr(wsFile, '\\');
+      WCHAR wsTemp[MAX_PATH];
+
+      if (lpFileName)
+      {
+        lpFileName++;
+
+        swprintf_s(wsTemp, L"%s  %s  %s  Build:%s [%s]", APP_NAME, APP_VER1, APP_VER2, APP_BUILD_VER, lpFileName);
+        SetWindowTextW(hMainDlg, wsTemp);
+      }
+    }
 
     DragFinish((HDROP)wParam);
     return 0;
