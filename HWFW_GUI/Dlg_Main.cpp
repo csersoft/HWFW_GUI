@@ -16,8 +16,22 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   {
   case WM_INITDIALOG:
   {
+    typedef BOOL(WINAPI * lpfnChangeWindowMessageFilter)(__in UINT message, __in DWORD dwFlag);
+
     RECT rcDlg, rcTmp, rcTmp2;
+    HMODULE hModUser32 = GetModuleHandleA("user32.dll");
     LPCH lpStr;
+
+    if (hModUser32)
+    {
+      lpfnChangeWindowMessageFilter fnChangeWindowMessageFilter = (lpfnChangeWindowMessageFilter)GetProcAddress(hModUser32, "ChangeWindowMessageFilter");
+
+      if (fnChangeWindowMessageFilter)
+      {
+        fnChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
+        fnChangeWindowMessageFilter(0x0049, MSGFLT_ADD);
+      }
+    }
 
     hMainDlg = hDlg;
 
@@ -68,6 +82,9 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
       lpStr++;
       strcpy_s(lpStr, MAX_PATH - (lpStr - chIniPath), "HWPDB.ini");
     }
+
+
+    TreeView_SetProc(GetDlgItem(hDlg, IDC_TV));
   }
   return (INT_PTR)TRUE;
 
