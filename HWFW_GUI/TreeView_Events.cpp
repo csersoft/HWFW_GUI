@@ -115,7 +115,7 @@ static void ListProductInfo(HWND hListView)
 
 
   ListView_AddColumn(hListView, 96, 0, L"产品标识");
-  ListView_AddColumn(hListView, 256, 1, L"匹配的产品名称");
+  ListView_AddColumn(hListView, 512, 1, L"匹配的产品名称");
 
   HWNP_GetProductListSize(&u16Size);
 
