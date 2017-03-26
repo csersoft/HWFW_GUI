@@ -26,7 +26,7 @@
 #include <time.h>
 
 #define APP_NAME                L"HWFW_GUI"
-#define APP_VER1                L"1.0.5"
+#define APP_VER1                L"1.0.6"
 #define APP_VER2                L"Beta"
 #define APP_BUILD_VER           L"001"
 
