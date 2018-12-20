@@ -21,6 +21,7 @@ static LPCH lpProductList = NULL;
 static uint32_t u32ItemCount = 0;
 static PINT_ITEMCOPY lpItemCopy = NULL;
 
+
 static inline void HWNP_SwapItemCopy(PINT_ITEMCOPY lpItemCopyA, PINT_ITEMCOPY lpItemCopyB)
 {
   INT_ITEMCOPY ItemCopyTmp = *lpItemCopyB;
@@ -287,7 +288,7 @@ int HWNP_GetItemDataTypeByIndex(__in uint32_t u32Index, __out LPDWORD lpDataType
   if (nState != -1) return (nLastError = -1501);
   if (u32Index >= u32ItemCount) return (nLastError = -1502);
   if (lpDataType == NULL) return (nLastError = -1503);
-  if (lpItemCopy[u32Index].u32DataSize < sizeof(WHWH_HDR)) return (nLastError = -1504);
+  if (lpItemCopy[u32Index].u32DataSize < sizeof(HWHW_HDR)) return (nLastError = -1504);
 
   DWORD dwType = 0;
 
@@ -295,8 +296,8 @@ int HWNP_GetItemDataTypeByIndex(__in uint32_t u32Index, __out LPDWORD lpDataType
   {
     dwType |= IDT_WHWH;
 
-    if ((lpItemCopy[u32Index].u32DataSize - sizeof(WHWH_HDR) >= sizeof(UIMG_HDR)) &&
-      ((*(LPDWORD)((DWORD)lpItemCopy[u32Index].lpItemData + sizeof(WHWH_HDR))) == IH_MAGIC_LE))
+    if ((lpItemCopy[u32Index].u32DataSize - sizeof(HWHW_HDR) >= sizeof(UIMG_HDR)) &&
+      ((*(LPDWORD)((DWORD)lpItemCopy[u32Index].lpItemData + sizeof(HWHW_HDR))) == IH_MAGIC_LE))
     {
       dwType |= IDT_UBOOT;
     }

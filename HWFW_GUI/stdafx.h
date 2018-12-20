@@ -25,9 +25,18 @@
 #include <tchar.h>
 #include <time.h>
 
+#ifdef NDEBUG
+#undef NDEBUG
+#include <assert.h>
+#define NDEBUG
+#else
+#include <assert.h>
+#endif
+
+
 #define APP_NAME                L"HWFW_GUI"
-#define APP_VER1                L"1.0.6"
-#define APP_VER2                L"Beta"
+#define APP_VER1                L"1.0.7"
+#define APP_VER2                L"Alpha"
 #define APP_BUILD_VER           L"001"
 
 
@@ -83,8 +92,8 @@
 #define SF_HEX_DEC                  L"0x%08X  (Dec:%u)"
 #define SF_HEX16                    L"0x%04hX"
 #define SF_HEX_DEC16                L"0x%04hX  (Dec:%hu)"
-#define SF_HEX8                      L"0x%02hX"
-#define SF_HEX_DEC8                  L"0x%02hX  (Dec:%hu)"
+#define SF_HEX8                     L"0x%02hX"
+#define SF_HEX_DEC8                 L"0x%02hX  (Dec:%hu)"
 
 //Item Index
 #define ItemIndex(i)                (i)

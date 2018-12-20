@@ -57,7 +57,7 @@ void SetStatus(LPCWSTR lpText, ...)
   SetWindowTextW(GetDlgItem(hMainDlg, IDC_LBL_STATUS), wsTmp);
 }
 
-void SetSubStatus(HWND hCtrl, LPCWSTR lpText, ...)
+void SetTooltip(HWND hCtrl, LPCWSTR lpText, ...)
 {
   va_list argptr;
   WCHAR wsTmp[512];

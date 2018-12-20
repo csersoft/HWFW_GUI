@@ -121,7 +121,7 @@ static void ListProductInfo(HWND hListView)
   HWNP_GetProductListSize(&u16Size);
 
   if (u16Size == 0) return;
-  
+
   u16Size += 4;
   lpProdList = (LPCH)calloc(u16Size, sizeof(CHAR));
 
@@ -378,16 +378,16 @@ void TreeView_SelChanged(LPNMTREEVIEW lpnmTV)
   switch (lpnmTV->itemNew.lParam)
   {
   case TT_FILEHDR:
-  ListFileHeader(hListView);
-  break;
+    ListFileHeader(hListView);
+    break;
 
   case TT_MODELINFO:
-  ListProductInfo(hListView);
-  break;
+    ListProductInfo(hListView);
+    break;
 
   case TT_ITEMINFO:
-  ListItemInfo(hListView);
-  break;
+    ListItemInfo(hListView);
+    break;
   }
 }
 

@@ -128,7 +128,7 @@ typedef struct _HWNP_PacketHeader
 
   union {
     uint16_t                u16ItemInfoSize;          //== sizeof(HWNP_ITEMINFO)
-    uint32_t                _u32ItemInfoSize;          //== sizeof(HWNP_ITEMINFO)
+    uint32_t                _u32ItemInfoSize;         //== sizeof(HWNP_ITEMINFO)
   };
   
   uint32_t                  u32Reserved;
@@ -176,7 +176,7 @@ typedef struct _WHWH_Header
   _WHHDR_ItemType           enumType;
   uint32_t                  u32RearSize;
   uint32_t                  u32RearCRC;
-} WHWH_HEADER, WHWH_HDR, *PWHWH_HEADER, *PWHWH_HDR;
+} WHWH_HEADER, HWHW_HDR, *PWHWH_HEADER, *PWHWH_HDR;
 
 //内存文件是否已更改
 BOOL          HWNP_IsChanged();

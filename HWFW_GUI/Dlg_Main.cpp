@@ -160,13 +160,13 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
       break;
 
       case IDM_EXIT:
-      HWNP_Release();
-      EndDialog(hDlg, 0);
-      break;
+        HWNP_Release();
+        EndDialog(hDlg, 0);
+        break;
 
       case IDM_ABOUT:
-      DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUT), hDlg, &DlgProc_About);
-      break;
+        DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUT), hDlg, &DlgProc_About);
+        break;
 
       case IDM_CHKCRC:
       {
@@ -229,7 +229,7 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
             lvi.iSubItem = 0;
 
             ListView_GetItemW(GetDlgItem(hDlg, IDC_LV), &lvi);
-            if(lvi.lParam) dlgiis.u32Index = (uint32_t)((PLVS)lvi.lParam)->dwUserData;
+            if (lvi.lParam) dlgiis.u32Index = (uint32_t)((PLVS)lvi.lParam)->dwUserData;
             else dlgiis.u32Index = 0;
           }
 
@@ -261,11 +261,11 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     break;
 
     case 1:
-    break;
+      break;
 
     default:
 
-    break;
+      break;
     }
 
   }
@@ -313,28 +313,39 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   break;
 
   case WM_CLOSE:
-  HWNP_Release();
-  EndDialog(hDlg, IDCLOSE);
-  break;
+    HWNP_Release();
+    EndDialog(hDlg, IDCLOSE);
+    break;
+
+  case WM_SIZING:
+  {
+    LPRECT lpRect = (LPRECT)lParam;
+
+    if (!lpRect) return FALSE;
+
+    if ((lpRect->right - lpRect->left) < 1024) lpRect->right = lpRect->left + 1024;
+    if ((lpRect->bottom - lpRect->top) < 480) lpRect->bottom = lpRect->top + 480;
+  }
+  return (INT_PTR)TRUE;
 
   case WM_SIZE:
 
-  if (wParam != SIZE_MINIMIZED)
-  {
-    int intWidth = LOWORD(lParam), intHeight = HIWORD(lParam);
+    if (wParam != SIZE_MINIMIZED)
+    {
+      int intWidth = LOWORD(lParam), intHeight = HIWORD(lParam);
 
-    SetWindowPos(GetDlgItem(hDlg, IDC_TV), NULL, 0, 0, lngTv_w, intHeight - lngTv_h_diff, SWP_NOMOVE | SWP_NOZORDER);
+      SetWindowPos(GetDlgItem(hDlg, IDC_TV), NULL, 0, 0, lngTv_w, intHeight - lngTv_h_diff, SWP_NOMOVE | SWP_NOZORDER);
 
-    SetWindowPos(GetDlgItem(hDlg, IDC_LV), NULL,
-      0, 0,
-      intWidth - lngLv_w_diff, intHeight - lngLv_h_diff, SWP_NOMOVE | SWP_NOZORDER);
+      SetWindowPos(GetDlgItem(hDlg, IDC_LV), NULL,
+        0, 0,
+        intWidth - lngLv_w_diff, intHeight - lngLv_h_diff, SWP_NOMOVE | SWP_NOZORDER);
 
-    SetWindowPos(GetDlgItem(hDlg, IDC_LBL_STATUS), NULL,
-      lngLbl_l, intHeight - lngLbl_t_diff,
-      intWidth - lngLbl_w_diff, lngLbl_h, SWP_NOZORDER);
-  }
+      SetWindowPos(GetDlgItem(hDlg, IDC_LBL_STATUS), NULL,
+        lngLbl_l, intHeight - lngLbl_t_diff,
+        intWidth - lngLbl_w_diff, lngLbl_h, SWP_NOZORDER);
+    }
 
-  break;
+    break;
   }
 
   return (INT_PTR)FALSE;

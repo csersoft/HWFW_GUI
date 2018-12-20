@@ -64,8 +64,14 @@ static inline BOOL ScreenToClient(
   __in HWND hWnd,
   __inout LPRECT lpRect)
 {
-  ScreenToClient(hWnd, (LPPOINT)lpRect);
-  return ScreenToClient(hWnd, (LPPOINT)&(lpRect->right));
+  __try {
+    ScreenToClient(hWnd, (LPPOINT)&(lpRect->left));
+    return ScreenToClient(hWnd, (LPPOINT)&(lpRect->right));
+  } 
+  __finally
+  {
+
+  }
 }
 
 static inline DWORD ScanfDec(LPCCH lpString)
@@ -98,7 +104,7 @@ static inline DWORD ScanfHex(LPCCH lpString)
 }
 
 void SetStatus(LPCWSTR lpText, ...);
-void SetSubStatus(HWND hCtrl, LPCWSTR lpText, ...);
+void SetTooltip(HWND hCtrl, LPCWSTR lpText, ...);
 
 BOOL QueryMsg(HWND hOwner, LPCWSTR szText, LPCWSTR szTitle);
 
