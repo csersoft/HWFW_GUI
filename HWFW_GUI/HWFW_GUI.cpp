@@ -1,6 +1,5 @@
 ﻿#include "stdafx.h"
-#include "HWFW_GUI.h"
-
+#include "HWFW_GUI.hpp"
 
 // 全局变量: 
 HINSTANCE hInst = NULL;                                // 当前实例
@@ -45,6 +44,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
   return 1;
 }
 
+
 void SetStatus(LPCWSTR lpText, ...)
 {
   va_list argptr;
@@ -86,7 +86,7 @@ BOOL GetOpenFilePath(HWND hOwner, LPWSTR lpFilePath, DWORD dwMax)
 
   ofn.lStructSize = sizeof(OPENFILENAMEW);
   ofn.hwndOwner = hOwner;
-  ofn.lpstrFilter = L"所有文件(*.*)\0*.*\0\0";
+  ofn.lpstrFilter = STR_FILE_TYPE;
   ofn.lpstrFile = lpFilePath;
   ofn.nMaxFile = dwMax;
   ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXPLORER;
@@ -102,7 +102,7 @@ BOOL GetSaveFilePath(HWND hOwner, LPWSTR lpFilePath, DWORD dwMax)
 
   ofn.lStructSize = sizeof(OPENFILENAMEW);
   ofn.hwndOwner = hOwner;
-  ofn.lpstrFilter = L"所有文件(*.*)\0*.*\0\0";
+  ofn.lpstrFilter = STR_FILE_TYPE;
   ofn.lpstrFile = lpFilePath;
   ofn.nMaxFile = dwMax;
   ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
@@ -183,19 +183,17 @@ int UpdateView()
   tvis.hInsertAfter = TVI_LAST;
   tvis.item.mask = TVIF_TEXT | TVIF_PARAM;
 
-  tvis.item.pszText = _T("<固件文件头部>");
+  tvis.item.pszText = L"<固件文件头部>";
   tvis.item.lParam = (LPARAM)TT_FILEHDR;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
-  tvis.item.pszText = _T("<型号支持信息>");
+  tvis.item.pszText = L"<型号支持信息>";
   tvis.item.lParam = (LPARAM)TT_MODELINFO;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
-  tvis.item.pszText = _T("<包含项目信息>");
+  tvis.item.pszText = L"<包含项目信息>";
   tvis.item.lParam = (LPARAM)TT_ITEMINFO;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
-
-  TreeView_DlgSetItemW(hMainDlg, IDC_TV, htiLastItem);
 
   return 0;
 }

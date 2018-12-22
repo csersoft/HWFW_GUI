@@ -176,7 +176,6 @@
   <ItemGroup>
     <Image Include="alipay.bmp" />
     <Image Include="HWFW_GUI.ico" />
-    <Image Include="small.ico" />
     <Image Include="wechat.bmp" />
   </ItemGroup>
   <ItemGroup>

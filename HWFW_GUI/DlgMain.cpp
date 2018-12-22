@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "HWFW_GUI.h"
+#include "DlgMain.h"
 
 CHAR chIniPath[MAX_PATH] = { 0 };
 

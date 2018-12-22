@@ -95,7 +95,7 @@ static void UpdateDataView_WHWH(HWND hDlg)
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHTIME), wsTemp);
 
   _localtime32_s(&_tm, &hdrWHWH.u32Time);
-  swprintf_s(wsTemp, L"%04u/%02u/%02u %02u:%02u:%02u", _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
+  swprintf_s(wsTemp, SF_DATE, _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHTIME_RO), wsTemp);
 
   if ((hdrWHWH.enumType >= 1) && (hdrWHWH.enumType <= 4))
@@ -131,7 +131,7 @@ static void UpdateDataView_UIMG(HWND hDlg)
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBTIME), wsTemp);
 
   _localtime32_s(&_tm, &_time32);
-  swprintf_s(wsTemp, L"%04u/%02u/%02u %02u:%02u:%02u", _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
+  swprintf_s(wsTemp, SF_DATE, _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBTIME_RO), wsTemp);
 
   mbstowcs_s(&stOut, wsTemp, hdrUIMG.ih_name, sizeof(UIMG_HDR::ih_name));
@@ -390,6 +390,8 @@ static uint32_t InitSubItemList() {
     CURRENT.hdrWHWH = *lpHwHdr;
     CURRENT.bIsImg = FALSE;
 
+    lpImgHdr = NULL;
+
     // 判断是否UImage
     if (lpHwHdr->u32RearSize >= sizeof(UIMG_HDR)) {
       lpImgHdr = (PUIMG_HDR)(MakePointer32(lpHwHdr, sizeof(HWHW_HDR)));
@@ -405,7 +407,7 @@ static uint32_t InitSubItemList() {
     }
 
     // 如果存在UImage
-    if (CURRENT.bIsImg) {
+    if (CURRENT.bIsImg && lpImgHdr) {
       CURRENT.hdrUIMG = *lpImgHdr;
 
       CURRENT.lpData = malloc(size);
@@ -421,7 +423,7 @@ static uint32_t InitSubItemList() {
       // 复制HWHW数据
       memcpy_s(CURRENT.lpData, lpHwHdr->u32RearSize, MakePointer32(lpHwHdr, sizeof(HWHW_HDR)), lpHwHdr->u32RearSize);
     }
-  
+
     CURRENT.bIsInit = TRUE;
     index++;
     offset += alignPage(sizeof(HWHW_HDR) + lpHwHdr->u32RearSize);
@@ -433,29 +435,28 @@ static uint32_t InitSubItemList() {
 
 static uint32_t UpdateSubItemList() {
   uint32_t index = 0;
-  HTREEITEM htiLastItem;
-  TVINSERTSTRUCTW tvis;
+  TVINSERTSTRUCTA tvis;
 
-  TreeView_DeleteAllItems(GetDlgItem(hDlgFmt, IDC_TV));
+  TreeView_DeleteAllItems(GetDlgItem(hDlgFmt, IDC_TV_SUBITEM));
 
-  ZeroMemory(&tvis, sizeof(TVINSERTSTRUCTW));
+  ZeroMemory(&tvis, sizeof(TVINSERTSTRUCTA));
   tvis.hParent = TVI_ROOT;
   tvis.hInsertAfter = TVI_LAST;
   tvis.item.mask = TVIF_TEXT | TVIF_PARAM;
 
-  tvis.item.pszText = _T("<固件文件头部>");
-  tvis.item.lParam = (LPARAM)TT_FILEHDR;
-  htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
+  for (index = 0; index < nSubItem; index++) {
+#define CURRENT     (lpSubItem[index])
+    if (CURRENT.bIsInit == FALSE) break;
 
-  tvis.item.pszText = _T("<型号支持信息>");
-  tvis.item.lParam = (LPARAM)TT_MODELINFO;
-  htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
+    tvis.item.pszText = CURRENT.hdrWHWH.chItemVersion;
+    tvis.item.lParam = (LPARAM)index;
+    TreeView_DlgInsertItemA(hDlgFmt, IDC_TV_SUBITEM, &tvis);
 
-  tvis.item.pszText = _T("<包含项目信息>");
-  tvis.item.lParam = (LPARAM)TT_ITEMINFO;
-  htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
+#undef CURRENT
+  }
 
-  TreeView_DlgSetItemW(hMainDlg, IDC_TV, htiLastItem);
+  return 0;
+
 }
 
 static int InitSubItem() {
@@ -470,6 +471,11 @@ static int InitSubItem() {
   nSubItem = size;
   lpSubItem = (PSUBITEM_OBJ)calloc(size, sizeof(SUBITEM_OBJ));
   lpCurrentItem = &lpSubItem[0];
+
+  InitSubItemList();
+  UpdateSubItemList();
+
+  return 0;
 }
 
 static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
@@ -546,6 +552,10 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
   ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 2, "2 RootFS");
   ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 3, "3 System");
   ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 4, "4 MiniSYS");
+
+  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_ALIGN), 0, "None");
+  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_ALIGN), 1, "Margin");
+  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_ALIGN), 2, "Padding");
 
   for (DWORD i = 0; i < IH_OS::IH_OS_COUNT; i++)
   {
@@ -802,6 +812,23 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       }
       break;
       }
+    }
+  }
+  break;
+
+  case WM_NOTIFY:
+  {
+    if (lParam == 0) break;
+
+    LPNMHDR lpNm = (LPNMHDR)lParam;
+
+    switch (lpNm->code)
+    {
+    case TVN_SELCHANGED:
+    {
+      TreeView_SelChanged((LPNMTREEVIEW)lParam);
+    }
+    break;
     }
   }
   break;

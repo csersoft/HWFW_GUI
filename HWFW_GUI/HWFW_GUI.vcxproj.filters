@@ -87,9 +87,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="HWFW_GUI.ico">
       <Filter>资源文件</Filter>
     </Image>

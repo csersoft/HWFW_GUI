@@ -51,11 +51,17 @@
 #define TreeView_DlgInsertItem(hwnd, item, lpis) \
   (HTREEITEM)::SendDlgItemMessage((hwnd), (int)(item), TVM_INSERTITEM, 0, (LPARAM)(lpis))
 
+#define TreeView_DlgInsertItemA(hwnd, item, lpis) \
+  (HTREEITEM)::SendDlgItemMessageA((hwnd), (int)(item), TVM_INSERTITEMA, 0, (LPARAM)(lpis))
+
 #define TreeView_DlgInsertItemW(hwnd, item, lpis) \
   (HTREEITEM)::SendDlgItemMessageW((hwnd), (int)(item), TVM_INSERTITEMW, 0, (LPARAM)(lpis))
 
 #define ListView_InsertColumnW(hwnd, iCol, pcol) \
   (int)::SendMessageW((hwnd), LVM_INSERTCOLUMNW, (WPARAM)(iCol), (LPARAM)(pcol))
+
+#define TreeView_DlgSetItemA(hwnd, item, pitem) \
+  (BOOL)::SendDlgItemMessageA((hwnd), (int)(item), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
 
 #define TreeView_DlgSetItemW(hwnd, item, pitem) \
   (BOOL)::SendDlgItemMessageW((hwnd), (int)(item), TVM_SETITEMW, 0, (LPARAM)(const TVITEMW *)(pitem))
@@ -94,6 +100,7 @@
 #define SF_HEX_DEC16                L"0x%04hX  (Dec:%hu)"
 #define SF_HEX8                     L"0x%02hX"
 #define SF_HEX_DEC8                 L"0x%02hX  (Dec:%hu)"
+#define SF_DATE                     L"%04u-%02u-%02u %02u:%02u:%02u"
 
 //Item Index
 #define ItemIndex(i)                (i)

@@ -21,6 +21,8 @@ INT_PTR CALLBACK    DlgProc_ItemInfo(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    DlgProc_AdvDatFmt(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    DlgProc_About(HWND, UINT, WPARAM, LPARAM);
 
+#define STR_FILE_TYPE       _T("所有文件(*.*)\0*.*\0\0")
+
 enum TVI_TYPE : unsigned int
 {
   TT_NONE,
@@ -59,19 +61,27 @@ typedef struct _DIALOG_ITEMINFO_STRUCT
   PWCHAR              lpFile;
 } DLGIIS, *PDLGIIS;
 
+void SetStatus(LPCWSTR lpText, ...);
+void SetTooltip(HWND hCtrl, LPCWSTR lpText, ...);
 
-static inline BOOL ScreenToClient(
-  __in HWND hWnd,
-  __inout LPRECT lpRect)
+BOOL QueryMsg(HWND hOwner, LPCWSTR szText, LPCWSTR szTitle);
+
+BOOL GetOpenFilePath(HWND hOwner, LPWSTR lpFilePath, DWORD dwMax);
+BOOL GetSaveFilePath(HWND hOwner, LPWSTR lpFilePath, DWORD dwMax);
+
+BOOL ExportToFile(LPCWSTR lpFile, LPCVOID lpData, DWORD dwSize);
+BOOL ImportFromFile(LPCWSTR lpFile, LPVOID *lppData, DWORD *lpdwSize);
+
+void CleanListView();
+
+void CleanView();
+
+void OpenFirmware(LPCWSTR lpPath);
+
+static inline BOOL ScreenToClient(__in HWND hWnd, __inout LPRECT lpRect)
 {
-  __try {
-    ScreenToClient(hWnd, (LPPOINT)&(lpRect->left));
-    return ScreenToClient(hWnd, (LPPOINT)&(lpRect->right));
-  } 
-  __finally
-  {
-
-  }
+  ScreenToClient(hWnd, (LPPOINT)&(lpRect->left));
+  return ScreenToClient(hWnd, (LPPOINT)&(lpRect->right));
 }
 
 static inline DWORD ScanfDec(LPCCH lpString)
@@ -102,35 +112,3 @@ static inline DWORD ScanfHex(LPCCH lpString)
 
   return dwHex;
 }
-
-void SetStatus(LPCWSTR lpText, ...);
-void SetTooltip(HWND hCtrl, LPCWSTR lpText, ...);
-
-BOOL QueryMsg(HWND hOwner, LPCWSTR szText, LPCWSTR szTitle);
-
-BOOL GetOpenFilePath(HWND hOwner, LPWSTR lpFilePath, DWORD dwMax);
-BOOL GetSaveFilePath(HWND hOwner, LPWSTR lpFilePath, DWORD dwMax);
-
-BOOL ExportToFile(LPCWSTR lpFile, LPCVOID lpData, DWORD dwSize);
-BOOL ImportFromFile(LPCWSTR lpFile, LPVOID *lppData, DWORD *lpdwSize);
-
-void CleanListView();
-
-void CleanView();
-
-void OpenFirmware(LPCWSTR lpPath);
-
-void ListItemInfo(HWND hListView);
-void UpdateItemInfo(HWND hListView);
-
-void TreeView_SetProc(HWND hCtrl);
-void TreeView_SelChanged(LPNMTREEVIEW lpnmTV);
-
-
-void ListView_SetProc(HWND hCtrl);
-void ListView_RightClick(LPNMITEMACTIVATE lpnmItemActivate);
-int ListView_AddColumn(HWND hCtrl, int nWidth, int nIndex, LPWSTR lpText);
-int ListView_AddItemA(HWND hCtrl, int iItem, int iSubItem, LPSTR lpText, LVI_TYPE ltType, DWORD dwFlags, DWORD dwUserData, LPARAM lParam);
-int ListView_AddItemW(HWND hCtrl, int iItem, int iSubItem, LPWSTR lpText, LVI_TYPE ltType, DWORD dwFlags, DWORD dwUserData, LPARAM lParam);
-int ListView_CurHotItem();
-

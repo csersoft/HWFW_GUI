@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
-#include "HWFW_GUI.h"
+#include "DlgMain.h"
+#include "HWFW_GUI.hpp"
 
 static WNDPROC wfnLV = NULL;
 static int nLastItem = -1;
