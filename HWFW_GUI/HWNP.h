@@ -24,9 +24,9 @@
 
 /*
 参考:
-http://blog.leexiaolan.tk/pwn-huawei-hg8120c-ont-via-maintenance-tool-part-2
-http://blog.leexiaolan.tk/pwn-huawei-hg8120c-ont-upgrade-pack-format-part-3
-https://github.com/LeeXiaolan/hwfw-tool
+  http://blog.leexiaolan.tk/pwn-huawei-hg8120c-ont-via-maintenance-tool-part-2
+  http://blog.leexiaolan.tk/pwn-huawei-hg8120c-ont-upgrade-pack-format-part-3
+  https://github.com/LeeXiaolan/hwfw-tool
 */
 
 #define CHK_FLAGS(v, f)                                     (((v) & (f)) == (f))
@@ -86,8 +86,54 @@ HuaWei 固件结构
 |            项目 RAW数据           |
 |___________________________________|
 
-*/
 
+
+HW项目数据 (数据不对齐):
+ ______________________________________________
+|                                              |
+|               HW 项目头 (whwh)               |
+| ____________________________________________ |
+||                                            ||
+||  uImage 项目头 (0x27, 0x05, 0x19, 0x56)    ||
+||____________________________________________||
+||                                            ||
+|| 项目有效载荷 (uboot, kernel, rootfs, ...)  ||
+||____________________________________________||
+ ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+ 
+HW项目数据 (Padding对齐):
+ _____________________________________________
+|                                             |
+|               HW 项目头 (whwh)              |
+| ___________________________________________ |
+||                                           ||
+||  uImage 项目头 (0x27, 0x05, 0x19, 0x56)   ||
+||___________________________________________||
+||                                           ||
+|| 项目有效载荷 (uboot, kernel, rootfs, ...) ||
+||___________________________________________||
+|                                             |
+|               对齐用的填充数据              |
+|_____________________________________________|
+
+
+HW项目数据 (Margin对齐):
+ _____________________________________________
+|                                             |
+|               HW 项目头 (whwh)              |
+| ___________________________________________ |
+||                                           ||
+||  uImage 项目头 (0x27, 0x05, 0x19, 0x56)   ||
+||___________________________________________||
+||                                           ||
+|| 项目有效载荷 (uboot, kernel, rootfs, ...) ||
+||___________________________________________||
+|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|
+|               对齐用的填充数据              |
+|_____________________________________________|
+
+*/
 
 //基本文件头
 typedef struct _HWNP_BasicFileHeader
@@ -96,7 +142,7 @@ typedef struct _HWNP_BasicFileHeader
   uint32_t                  u32Magic;
 
   //文件大小 (计算公式为.bin的文件大小 - 76)  big-endian
-  uint32_t                  beu32FileSize;
+  __be32                    beu32FileSize;
 
   //从HWNP_FILEHDR2开始到文件结束的CRC32值 (包含项目数据)
   uint32_t                  u32FileCRC32;
@@ -134,6 +180,9 @@ typedef struct _HWNP_PacketHeader
   uint32_t                  u32Reserved;
 } HWNP_PAKHDR, *PHWNP_PAKHDR;
 
+/*
+HWNP: Hua Wei Network Packet ?
+*/
 typedef struct _HWNP_Header
 {
   HWNP_BASFILEHDR           BasicFileHeader;
@@ -151,32 +200,55 @@ typedef struct _HWNP_ItemInfo
   uint32_t                  u32Offset;
   uint32_t                  u32Size;              //原  Len
   char                      chItemPath[256];      //原  Destination
-  char                      chItemType[16];        //原  Name
+  char                      chItemType[16];       //原  Name
   char                      chItemVersion[64];
   uint32_t                  u32Policy;
   uint32_t                  u32Reserved;
 } HWNP_ITEMINFO, *PHWNP_ITEMINFO;
 
 
-enum _WHHDR_ItemType : uint32_t
+enum HW_ItemType : uint32_t
 {
-  whType_Invalid = 0U,
-  whType_Kernel = 1U,
-  whType_RootFS,
-  whType_System,
-  whType_MiniSYS
+  hwType_Invalid = 0U,
+  hwType_Kernel = 1U,
+  hwType_RootFS,
+  hwType_System,
+  hwType_MiniSYS,
+  hwType_UNK_5,
+  hwType_UNK_6,
+  hwType_L2Boot,
+  hwType_UBoot,
+  hwType_UNK_9,
+  hwType_UNK_10,
+  hwType_SignInf,
+  hwType_Limit
 };
 
-typedef struct _WHWH_Header
+const char * const HW_ItemType_Text[hwType_Limit] = {
+  "?   Invalid",
+  "1   Kernel",
+  "2   RootFS",
+  "3   System",
+  "4   MiniSYS",
+  "5   UNK_5",
+  "6   UNK_6",
+  "7   L2Boot",
+  "8   UBoot",
+  "9   UNK_9",
+  "10  UNK_10",
+  "11  SignInfo",
+};
+
+typedef struct _HW_Header
 {
   //魔法字
   uint32_t                  u32Magic;
   char                      chItemVersion[64];
   __time32_t                u32Time;
-  _WHHDR_ItemType           enumType;
+  HW_ItemType               u32Type;
   uint32_t                  u32RearSize;
   uint32_t                  u32RearCRC;
-} WHWH_HEADER, HWHW_HDR, *PWHWH_HEADER, *PWHWH_HDR;
+} HW_HEADER, HW_HDR, *PHW_HEADER, *PHW_HDR;
 
 //内存文件是否已更改
 BOOL          HWNP_IsChanged();

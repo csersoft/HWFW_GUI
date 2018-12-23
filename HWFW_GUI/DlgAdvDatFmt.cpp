@@ -1,5 +1,5 @@
 ﻿#include "stdafx.h"
-#include "HWFW_GUI.h"
+#include "HWFW_GUI.hpp"
 
 /************************************************************************/
 /* WHWH子项目                                                           */
@@ -7,7 +7,7 @@
 typedef struct {
   BOOL          bIsInit = FALSE;
   BOOL          bIsImg = FALSE;
-  HWHW_HDR      hdrWHWH;
+  HW_HDR      hdrWHWH;
   UIMG_HDR      hdrUIMG;
   LPVOID        lpData = NULL;
 } SUBITEM_OBJ, *PSUBITEM_OBJ;
@@ -16,7 +16,7 @@ static uint32_t u32ItemIdx;
 static LPCVOID lpItemData = NULL;
 static uint32_t u32DataSize = 0;
 static BOOL bIsImg;
-static HWHW_HDR hdrWHWH;
+static HW_HDR hdrWHWH;
 static UIMG_HDR hdrUIMG;
 static LPVOID lpData_WHWH = NULL;
 static LPVOID lpData_UIMG = NULL;
@@ -88,7 +88,7 @@ static void UpdateDataView_WHWH(HWND hDlg)
   tm _tm;
   WCHAR wsTemp[260];
 
-  mbstowcs_s(&stOut, wsTemp, hdrWHWH.chItemVersion, sizeof(HWHW_HDR::chItemVersion));
+  mbstowcs_s(&stOut, wsTemp, hdrWHWH.chItemVersion, sizeof(HW_HDR::chItemVersion));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHVER), wsTemp);
 
   swprintf_s(wsTemp, SF_HEX, hdrWHWH.u32Time);
@@ -98,8 +98,8 @@ static void UpdateDataView_WHWH(HWND hDlg)
   swprintf_s(wsTemp, SF_DATE, _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHTIME_RO), wsTemp);
 
-  if ((hdrWHWH.enumType >= 1) && (hdrWHWH.enumType <= 4))
-    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), hdrWHWH.enumType);
+  if ((hdrWHWH.u32Type >= HW_ItemType::hwType_Invalid) && (hdrWHWH.u32Type < HW_ItemType::hwType_Limit))
+    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), hdrWHWH.u32Type);
   else
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), 0);
 
@@ -168,13 +168,13 @@ static BOOL UpdateDataView(HWND hDlg)
 {
   if (lpData_WHWH == NULL)
   {
-    hdrWHWH = *(PWHWH_HDR)lpItemData;
+    hdrWHWH = *(PHW_HDR)lpItemData;
 
     if (hdrWHWH.u32Magic != HWNP_WHWH_MAGIC) return FALSE;
 
     lpData_WHWH = malloc(hdrWHWH.u32RearSize);
     if (lpData_WHWH == NULL) return FALSE;
-    memcpy_s(lpData_WHWH, hdrWHWH.u32RearSize, MakePointer32(lpItemData, sizeof(HWHW_HDR)), hdrWHWH.u32RearSize);
+    memcpy_s(lpData_WHWH, hdrWHWH.u32RearSize, MakePointer32(lpItemData, sizeof(HW_HDR)), hdrWHWH.u32RearSize);
   }
 
   if (hdrWHWH.u32RearSize >= sizeof(UIMG_HDR))
@@ -224,7 +224,7 @@ static BOOL UpdateDataView(HWND hDlg)
     }
     else
     {
-      memcpy_s(lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size), MakePointer32(lpItemData, sizeof(HWHW_HDR) + sizeof(UIMG_HDR)), BigLittleSwap32(hdrUIMG.ih_size));
+      memcpy_s(lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size), MakePointer32(lpItemData, sizeof(HW_HDR) + sizeof(UIMG_HDR)), BigLittleSwap32(hdrUIMG.ih_size));
     }
   }
 
@@ -244,7 +244,7 @@ static void SaveHeader_WHWH(HWND hDlg)
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_WHTIME), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) hdrWHWH.u32Time = ScanfHex(chTmp);
 
-  hdrWHWH.enumType = (_WHHDR_ItemType)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE));
+  hdrWHWH.u32Type = (HW_ItemType)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE));
 
 }
 
@@ -274,7 +274,7 @@ static void BtnSave_WHWH(HWND hDlg)
 {
   if (lpData_WHWH == NULL) return;
 
-  DWORD dwSize = sizeof(HWHW_HDR) + hdrWHWH.u32RearSize;
+  DWORD dwSize = sizeof(HW_HDR) + hdrWHWH.u32RearSize;
   LPVOID lpData = malloc(dwSize);
   int nResult;
 
@@ -288,8 +288,8 @@ static void BtnSave_WHWH(HWND hDlg)
 
   //hdrWHWH.u32RearCRC = crc32_fast(lpData_WHWH, hdrWHWH.u32RearSize);
 
-  memcpy_s(lpData, dwSize, &hdrWHWH, sizeof(HWHW_HDR));
-  memcpy_s(MakePointer32(lpData, sizeof(HWHW_HDR)), dwSize - sizeof(HWHW_HDR), lpData_WHWH, hdrWHWH.u32RearSize);
+  memcpy_s(lpData, dwSize, &hdrWHWH, sizeof(HW_HDR));
+  memcpy_s(MakePointer32(lpData, sizeof(HW_HDR)), dwSize - sizeof(HW_HDR), lpData_WHWH, hdrWHWH.u32RearSize);
 
   nResult = HWNP_SetItemData(u32ItemIdx, lpData, dwSize);
   free(lpData);
@@ -304,7 +304,7 @@ static void BtnSave_UIMG(HWND hDlg)
 {
   if (bIsImg && lpData_UIMG)
   {
-    DWORD dwSize = sizeof(HWHW_HDR) + sizeof(UIMG_HDR) + BigLittleSwap32(hdrUIMG.ih_size);
+    DWORD dwSize = sizeof(HW_HDR) + sizeof(UIMG_HDR) + BigLittleSwap32(hdrUIMG.ih_size);
     LPVOID lpData = malloc(dwSize);
     int nResult;
 
@@ -327,13 +327,13 @@ static void BtnSave_UIMG(HWND hDlg)
       hdrUIMG.ih_hcrc = BigLittleSwap32(crc32_fast(&hdrTmp, sizeof(UIMG_HDR)));
     }
 
-    memcpy_s(MakePointer32(lpData, sizeof(HWHW_HDR)), dwSize - sizeof(HWHW_HDR), &hdrUIMG, sizeof(UIMG_HDR));
-    memcpy_s(MakePointer32(lpData, sizeof(HWHW_HDR) + sizeof(UIMG_HDR)), dwSize - (sizeof(HWHW_HDR) + sizeof(UIMG_HDR)), lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size));
+    memcpy_s(MakePointer32(lpData, sizeof(HW_HDR)), dwSize - sizeof(HW_HDR), &hdrUIMG, sizeof(UIMG_HDR));
+    memcpy_s(MakePointer32(lpData, sizeof(HW_HDR) + sizeof(UIMG_HDR)), dwSize - (sizeof(HW_HDR) + sizeof(UIMG_HDR)), lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size));
 
     hdrWHWH.u32RearSize = sizeof(UIMG_HDR) + BigLittleSwap32(hdrUIMG.ih_size);
-    hdrWHWH.u32RearCRC = crc32_fast(MakePointer32(lpData, sizeof(HWHW_HDR)), hdrWHWH.u32RearSize);
+    hdrWHWH.u32RearCRC = crc32_fast(MakePointer32(lpData, sizeof(HW_HDR)), hdrWHWH.u32RearSize);
 
-    memcpy_s(lpData, dwSize, &hdrWHWH, sizeof(HWHW_HDR));
+    memcpy_s(lpData, dwSize, &hdrWHWH, sizeof(HW_HDR));
 
     nResult = HWNP_SetItemData(u32ItemIdx, lpData, dwSize);
     free(lpData);
@@ -350,21 +350,21 @@ static void BtnSave_UIMG(HWND hDlg)
 /************************************************************************/
 static uint32_t EnumSubItem() {
   const BYTE *lpData = (const BYTE*)lpItemData;
-  const HWHW_HDR *lpHeader;
+  const HW_HDR *lpHeader;
   uint32_t result = 0;
   uint32_t offset = 0;
 
   if (lpData == NULL) return result;
 
   //判断头长度是否满足
-  while (offset + sizeof(HWHW_HDR) < u32DataSize) {
-    lpHeader = (const PWHWH_HDR)(&lpData[offset]);
+  while (offset + sizeof(HW_HDR) < u32DataSize) {
+    lpHeader = (const PHW_HDR)(&lpData[offset]);
 
     if (lpHeader->u32Magic != HWNP_WHWH_MAGIC) break;
 
     result++;
 
-    offset += alignPage(sizeof(HWHW_HDR) + lpHeader->u32RearSize);
+    offset += alignPage(sizeof(HW_HDR) + lpHeader->u32RearSize);
   }
 
   return result;
@@ -375,15 +375,15 @@ static uint32_t EnumSubItem() {
 /************************************************************************/
 static uint32_t InitSubItemList() {
   const BYTE *lpData = (const BYTE*)lpItemData;
-  const HWHW_HDR *lpHwHdr;
+  const HW_HDR *lpHwHdr;
   const UIMG_HDR *lpImgHdr;
   uint32_t offset = 0, index = 0;
   uint32_t size;
 
   // 循环初始化每个子项目
-  while (offset + sizeof(HWHW_HDR) < u32DataSize && index < nSubItem) {
+  while (offset + sizeof(HW_HDR) < u32DataSize && index < nSubItem) {
 #define CURRENT     (lpSubItem[index])
-    lpHwHdr = (PWHWH_HDR)(&lpData[offset]);
+    lpHwHdr = (PHW_HDR)(&lpData[offset]);
 
     if (lpHwHdr->u32Magic != HWNP_WHWH_MAGIC) break;
 
@@ -394,7 +394,7 @@ static uint32_t InitSubItemList() {
 
     // 判断是否UImage
     if (lpHwHdr->u32RearSize >= sizeof(UIMG_HDR)) {
-      lpImgHdr = (PUIMG_HDR)(MakePointer32(lpHwHdr, sizeof(HWHW_HDR)));
+      lpImgHdr = (PUIMG_HDR)(MakePointer32(lpHwHdr, sizeof(HW_HDR)));
 
       if (lpImgHdr->ih_magic == IH_MAGIC_LE) {
         size = BigLittleSwap32(lpImgHdr->ih_size);
@@ -421,12 +421,12 @@ static uint32_t InitSubItemList() {
       assert(CURRENT.lpData != NULL);
 
       // 复制HWHW数据
-      memcpy_s(CURRENT.lpData, lpHwHdr->u32RearSize, MakePointer32(lpHwHdr, sizeof(HWHW_HDR)), lpHwHdr->u32RearSize);
+      memcpy_s(CURRENT.lpData, lpHwHdr->u32RearSize, MakePointer32(lpHwHdr, sizeof(HW_HDR)), lpHwHdr->u32RearSize);
     }
 
     CURRENT.bIsInit = TRUE;
     index++;
-    offset += alignPage(sizeof(HWHW_HDR) + lpHwHdr->u32RearSize);
+    offset += alignPage(sizeof(HW_HDR) + lpHwHdr->u32RearSize);
 #undef CURRENT
   }
 
@@ -513,7 +513,7 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
     return TRUE;
   }
 
-  if (u32DataSize <= sizeof(HWHW_HDR)) {
+  if (u32DataSize <= sizeof(HW_HDR)) {
     SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"项目数据长度太小!");
     return TRUE;
   }
@@ -540,18 +540,16 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
     blUIMG = FALSE;
     */
 
-  SNDMSG(GetDlgItem(hDlg, IDC_EDIT_WHVER), EM_SETLIMITTEXT, sizeof(WHWH_HEADER::chItemVersion), 0);
+  SNDMSG(GetDlgItem(hDlg, IDC_EDIT_WHVER), EM_SETLIMITTEXT, sizeof(HW_HEADER::chItemVersion), 0);
   SNDMSG(GetDlgItem(hDlg, IDC_EDIT_WHTIME), EM_SETLIMITTEXT, 10, 0);
   SNDMSG(GetDlgItem(hDlg, IDC_EDIT_UBTIME), EM_SETLIMITTEXT, 10, 0);
   SNDMSG(GetDlgItem(hDlg, IDC_EDIT_UBLOAD), EM_SETLIMITTEXT, 10, 0);
   SNDMSG(GetDlgItem(hDlg, IDC_EDIT_UBEP), EM_SETLIMITTEXT, 10, 0);
   SNDMSG(GetDlgItem(hDlg, IDC_EDIT_UBNAME), EM_SETLIMITTEXT, IH_NMLEN, 0);
 
-  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 0, "? Invalid");
-  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 1, "1 Kernel");
-  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 2, "2 RootFS");
-  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 3, "3 System");
-  ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), 4, "4 MiniSYS");
+  for (int i = 0; i < HW_ItemType::hwType_Limit; i++) {
+    ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_WHTYPE), i, HW_ItemType_Text[i]);
+  }
 
   ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_ALIGN), 0, "None");
   ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_ALIGN), 1, "Margin");
@@ -585,7 +583,7 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
     return (INT_PTR)FALSE;
   }
 
-  if (u32DataSize < sizeof(HWHW_HDR) + hdrWHWH.u32RearSize)
+  if (u32DataSize < sizeof(HW_HDR) + hdrWHWH.u32RearSize)
   {
     //EnableWindow(hDlg, FALSE);
     MessageBoxW(hDlg, L"WHWH数据长度大于项目数据长度!", L"错误", MB_ICONERROR | MB_OK);
@@ -594,6 +592,14 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
 
   return (INT_PTR)TRUE;
 
+}
+
+void SubItemChanged(LPNMTREEVIEW lpnmTV)
+{
+  switch (lpnmTV->itemNew.lParam)
+  {
+
+  }
 }
 
 /*
@@ -826,7 +832,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
     {
     case TVN_SELCHANGED:
     {
-      TreeView_SelChanged((LPNMTREEVIEW)lParam);
+      SubItemChanged((LPNMTREEVIEW)lParam);
     }
     break;
     }

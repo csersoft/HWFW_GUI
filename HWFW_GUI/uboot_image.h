@@ -71,6 +71,8 @@ enum IH_OS : uint8_t {
   IH_OS_OSE,      /* OSE    */
   IH_OS_PLAN9,      /* Plan 9  */
   IH_OS_OPENRTOS,    /* OpenRTOS  */
+  IH_OS_ARM_TRUSTED_FIRMWARE,     /* ARM Trusted Firmware */
+  IH_OS_TEE,			/* Trusted Execution Environment */
 
   IH_OS_COUNT,
 };
@@ -100,7 +102,9 @@ const char * const enum_IH_OS[IH_OS_COUNT] = {
   "INTEGRITY",
   "OSE",
   "Plan 9",
-  "OpenRTOS"
+  "OpenRTOS",
+  "ARM Trusted Firmware",
+  "Trusted Execution Environment"
 };
 
 /*
@@ -136,6 +140,7 @@ enum IH_ARCH : uint8_t {
   IH_ARCH_ARC,      /* Synopsys DesignWare ARC */
   IH_ARCH_X86_64,      /* AMD x86_64, Intel and Via */
   IH_ARCH_XTENSA,      /* Xtensa  */
+  IH_ARCH_RISCV,			/* RISC-V */
 
   IH_ARCH_COUNT,
 };
@@ -166,7 +171,8 @@ const char * const enum_IH_ARCH[IH_ARCH_COUNT] = {
   "ARM64",
   "ARC",
   "x86_64",
-  "Xtensa"
+  "Xtensa",
+  "RISC-V"
 };
 
 
@@ -244,6 +250,14 @@ enum IH_TYPE : uint8_t {
   IH_TYPE_ZYNQMPIMAGE,    /* Xilinx ZynqMP Boot Image */
   IH_TYPE_FPGA,      /* FPGA Image */
   IH_TYPE_VYBRIDIMAGE,  /* VYBRID .vyb Image */
+  IH_TYPE_TEE,            /* Trusted Execution Environment OS Image */
+  IH_TYPE_FIRMWARE_IVT,		/* Firmware Image with HABv4 IVT */
+  IH_TYPE_PMMC,            /* TI Power Management Micro-Controller Firmware */
+  IH_TYPE_STM32IMAGE,		/* STMicroelectronics STM32 Image */
+  IH_TYPE_SOCFPGAIMAGE_V1,	/* Altera SOCFPGA A10 Preloader	*/
+  IH_TYPE_MTKIMAGE,		/* MediaTek BootROM loadable Image */
+  IH_TYPE_IMX8MIMAGE,		/* Freescale IMX8MBoot Image	*/
+  IH_TYPE_IMX8IMAGE,		/* Freescale IMX8Boot Image	*/
 
   IH_TYPE_COUNT,      /* Number of image types */
 };
@@ -278,7 +292,15 @@ const char * const enum_IH_TYPE[IH_TYPE_COUNT] = {
   "Xilinx Zynq Boot Image",
   "Xilinx ZynqMP Boot Image",
   "FPGA Image",
-  "VYBRID .vyb Image"
+  "VYBRID .vyb Image",
+  "TEE OS Image",
+  "HABv4 IVT Image",
+  "TI PMMC Firmware",
+  "STM32 Image",
+  "Altera SOCFPGA A10 Preloader",
+  "MediaTek BootROM loadable Image",
+  "Freescale IMX8MBoot Image",
+  "Freescale IMX8Boot Image"
 };
 
 

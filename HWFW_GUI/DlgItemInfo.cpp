@@ -1,5 +1,5 @@
 ﻿#include "stdafx.h"
-#include "HWFW_GUI.h"
+#include "HWFW_GUI.hpp"
 
 static PDLGIIS lpDlgIIS = NULL;
 static HWNP_ITEMINFO hwItemInfo;
@@ -38,16 +38,16 @@ static void UpdateView(HWND hDlg)
   if (lpDlgIIS->dtType == DT_EDIT)
   {
     if ((HWNP_GetItemDataTypeByIndex(lpDlgIIS->u32Index, &dwType) == 0) && (CHK_FLAGS(dwType, IDT_WHWH)))
-      EnableWindow(GetDlgItem(hDlg, IDC_ADVDATFMT), TRUE);
+      EnableWindow(GetDlgItem(hDlg, IDC_BTN_ADF), TRUE);
     else
-      EnableWindow(GetDlgItem(hDlg, IDC_ADVDATFMT), FALSE);
+      EnableWindow(GetDlgItem(hDlg, IDC_BTN_ADF), FALSE);
 
   }
   else if (lpDlgIIS->dtType == DT_ADD)
   {
-    EnableWindow(GetDlgItem(hDlg, IDC_ADVDATFMT), FALSE);
-    EnableWindow(GetDlgItem(hDlg, IDC_EXPORT), FALSE);
-    EnableWindow(GetDlgItem(hDlg, IDC_IMPORT), FALSE);
+    EnableWindow(GetDlgItem(hDlg, IDC_BTN_ADF), FALSE);
+    EnableWindow(GetDlgItem(hDlg, IDC_BTN_EXP), FALSE);
+    EnableWindow(GetDlgItem(hDlg, IDC_BTN_IMP), FALSE);
   }
 
   swprintf_s(wsTemp, SF_DEC, hwItemInfo.u32Id);
@@ -162,7 +162,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
     {
       switch (wId)
       {
-      case IDC_EXPORT:
+      case IDC_BTN_EXP:
       if (lpDlgIIS->dtType == DT_EDIT)
       {
         int nResult;
@@ -194,7 +194,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
       }
       break;
 
-      case IDC_IMPORT:
+      case IDC_BTN_IMP:
       if (lpDlgIIS->dtType == DT_EDIT)
       {
         int nResult;
@@ -222,11 +222,11 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
       }
       break;
 
-      case IDC_ADVDATFMT:
+      case IDC_BTN_ADF:
       if (lpDlgIIS->dtType == DT_EDIT)
       {
         SaveItemInfo(hDlg);
-        DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ADVDATFMTDLG), hDlg, &DlgProc_AdvDatFmt, (LPARAM)lpDlgIIS->u32Index);
+        DialogBoxParam(hInst, MAKEINTRESOURCE(IDC_BTN_ADF), hDlg, &DlgProc_AdvDatFmt, (LPARAM)lpDlgIIS->u32Index);
         UpdateView(hDlg);
       }
       break;

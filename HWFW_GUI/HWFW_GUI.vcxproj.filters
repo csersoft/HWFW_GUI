@@ -39,13 +39,16 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="HWFW_GUI.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="HWNP.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="uboot_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgMain.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HWFW_GUI.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,16 +71,16 @@
     <ClCompile Include="FastCRC32.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Dlg_AdvDatFmt.cpp">
+    <ClCompile Include="DlgAbout.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Dlg_ItemInfo.cpp">
+    <ClCompile Include="DlgAdvDatFmt.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Dlg_Main.cpp">
+    <ClCompile Include="DlgItemInfo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Dlg_About.cpp">
+    <ClCompile Include="DlgMain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

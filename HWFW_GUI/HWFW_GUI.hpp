@@ -73,9 +73,7 @@ BOOL ExportToFile(LPCWSTR lpFile, LPCVOID lpData, DWORD dwSize);
 BOOL ImportFromFile(LPCWSTR lpFile, LPVOID *lppData, DWORD *lpdwSize);
 
 void CleanListView();
-
 void CleanView();
-
 void OpenFirmware(LPCWSTR lpPath);
 
 static inline BOOL ScreenToClient(__in HWND hWnd, __inout LPRECT lpRect)

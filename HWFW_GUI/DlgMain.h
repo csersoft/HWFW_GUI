@@ -14,6 +14,7 @@
 
 #include "resource.h"
 #include "HWNP.h"
+#include "HWFW_GUI.hpp"
 
 void ListItemInfo(HWND hListView);
 void UpdateItemInfo(HWND hListView);
