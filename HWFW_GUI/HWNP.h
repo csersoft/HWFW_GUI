@@ -220,23 +220,23 @@ enum HW_ItemType : uint32_t
   hwType_UBoot,
   hwType_UNK_9,
   hwType_UNK_10,
-  hwType_SignInf,
+  hwType_SignInfo,
   hwType_Limit
 };
 
 const char * const HW_ItemType_Text[hwType_Limit] = {
-  "?   Invalid",
-  "1   Kernel",
-  "2   RootFS",
-  "3   System",
-  "4   MiniSYS",
-  "5   UNK_5",
-  "6   UNK_6",
-  "7   L2Boot",
-  "8   UBoot",
-  "9   UNK_9",
-  "10  UNK_10",
-  "11  SignInfo",
+  "?    Invalid",
+  "1    Kernel",
+  "2    RootFS",
+  "3    System",
+  "4    MiniSYS",
+  "5    UNK_5",
+  "6    UNK_6",
+  "7    L2Boot",
+  "8    UBoot",
+  "9    UNK_9",
+  "10   UNK_10",
+  "11   SignInfo",
 };
 
 typedef struct _HW_Header

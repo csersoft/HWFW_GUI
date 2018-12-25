@@ -7,22 +7,19 @@
 typedef struct {
   BOOL          bIsInit = FALSE;
   BOOL          bIsImg = FALSE;
-  HW_HDR      hdrWHWH;
+  HW_HDR        hdrWHWH;
   UIMG_HDR      hdrUIMG;
+  LPCVOID       lpcData = NULL;
+  LPCVOID       lpcImageData = NULL;
   LPVOID        lpData = NULL;
+  LPVOID        lpImageData = NULL;
 } SUBITEM_OBJ, *PSUBITEM_OBJ;
 
-static uint32_t u32ItemIdx;
+
 static LPCVOID lpItemData = NULL;
 static uint32_t u32DataSize = 0;
-static BOOL bIsImg;
-static HW_HDR hdrWHWH;
-static UIMG_HDR hdrUIMG;
-static LPVOID lpData_WHWH = NULL;
-static LPVOID lpData_UIMG = NULL;
-
+static uint32_t u32ItemIdx;
 static HWND hDlgFmt = NULL;
-
 static PSUBITEM_OBJ lpSubItem = NULL;
 static PSUBITEM_OBJ lpCurrentItem = NULL;
 static uint32_t nSubItem = 0;
@@ -40,6 +37,13 @@ static void Release()
   lpItemData = NULL;
   u32DataSize = 0;
 
+  if (lpSubItem && nSubItem) {
+    for (uint32_t i = 0; i < nSubItem; i++) {
+      //lpSubItem[i]
+    }
+  }
+
+  /*
   if (lpSubItem) {
     free(lpSubItem);
     lpSubItem = NULL;
@@ -57,6 +61,7 @@ static void Release()
     free(lpData_UIMG);
     lpData_UIMG = NULL;
   }
+  */
 }
 
 static void EnableWindow_UBootGroup(HWND hDlg, BOOL blEnable)
@@ -88,25 +93,25 @@ static void UpdateDataView_WHWH(HWND hDlg)
   tm _tm;
   WCHAR wsTemp[260];
 
-  mbstowcs_s(&stOut, wsTemp, hdrWHWH.chItemVersion, sizeof(HW_HDR::chItemVersion));
+  mbstowcs_s(&stOut, wsTemp, lpCurrentItem->hdrWHWH.chItemVersion, sizeof(HW_HDR::chItemVersion));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHVER), wsTemp);
 
-  swprintf_s(wsTemp, SF_HEX, hdrWHWH.u32Time);
+  swprintf_s(wsTemp, SF_HEX, lpCurrentItem->hdrWHWH.u32Time);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHTIME), wsTemp);
 
-  _localtime32_s(&_tm, &hdrWHWH.u32Time);
+  _localtime32_s(&_tm, &lpCurrentItem->hdrWHWH.u32Time);
   swprintf_s(wsTemp, SF_DATE, _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHTIME_RO), wsTemp);
 
-  if ((hdrWHWH.u32Type >= HW_ItemType::hwType_Invalid) && (hdrWHWH.u32Type < HW_ItemType::hwType_Limit))
-    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), hdrWHWH.u32Type);
+  if ((lpCurrentItem->hdrWHWH.u32Type >= HW_ItemType::hwType_Invalid) && (lpCurrentItem->hdrWHWH.u32Type < HW_ItemType::hwType_Limit))
+    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), lpCurrentItem->hdrWHWH.u32Type);
   else
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), 0);
 
-  swprintf_s(wsTemp, SF_HEX, hdrWHWH.u32RearSize);
+  swprintf_s(wsTemp, SF_HEX, lpCurrentItem->hdrWHWH.u32RearSize);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHSIZE), wsTemp);
 
-  swprintf_s(wsTemp, SF_HEX, hdrWHWH.u32RearCRC);
+  swprintf_s(wsTemp, SF_HEX, lpCurrentItem->hdrWHWH.u32RearCRC);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHCRC), wsTemp);
 }
 
@@ -117,16 +122,16 @@ static void UpdateDataView_UIMG(HWND hDlg)
   tm _tm;
   WCHAR wsTemp[260];
 
-  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(hdrUIMG.ih_hcrc));
+  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_hcrc));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBHDRCRC), wsTemp);
 
-  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(hdrUIMG.ih_dcrc));
+  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_dcrc));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBDATCRC), wsTemp);
 
-  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(hdrUIMG.ih_size));
+  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_size));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBSIZE), wsTemp);
 
-  _time32 = BigLittleSwap32(hdrUIMG.ih_time);
+  _time32 = BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_time);
   swprintf_s(wsTemp, SF_HEX, _time32);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBTIME), wsTemp);
 
@@ -134,144 +139,118 @@ static void UpdateDataView_UIMG(HWND hDlg)
   swprintf_s(wsTemp, SF_DATE, _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBTIME_RO), wsTemp);
 
-  mbstowcs_s(&stOut, wsTemp, hdrUIMG.ih_name, sizeof(UIMG_HDR::ih_name));
+  mbstowcs_s(&stOut, wsTemp, lpCurrentItem->hdrUIMG.ih_name, sizeof(UIMG_HDR::ih_name));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBNAME), wsTemp);
 
-  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(hdrUIMG.ih_load));
+  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_load));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBLOAD), wsTemp);
 
-  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(hdrUIMG.ih_ep));
+  swprintf_s(wsTemp, SF_HEX, BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_ep));
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_UBEP), wsTemp);
 
-  if (hdrUIMG.ih_os < IH_OS::IH_OS_COUNT)
-    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBOS), hdrUIMG.ih_os);
+  if (lpCurrentItem->hdrUIMG.ih_os < IH_OS::IH_OS_COUNT)
+    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBOS), lpCurrentItem->hdrUIMG.ih_os);
   else
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBOS), 0);
 
-  if (hdrUIMG.ih_arch < IH_ARCH::IH_ARCH_COUNT)
-    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBARCH), hdrUIMG.ih_arch);
+  if (lpCurrentItem->hdrUIMG.ih_arch < IH_ARCH::IH_ARCH_COUNT)
+    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBARCH), lpCurrentItem->hdrUIMG.ih_arch);
   else
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBARCH), 0);
 
-  if (hdrUIMG.ih_type < IH_TYPE::IH_TYPE_COUNT)
-    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBIMG), hdrUIMG.ih_type);
+  if (lpCurrentItem->hdrUIMG.ih_type < IH_TYPE::IH_TYPE_COUNT)
+    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBIMG), lpCurrentItem->hdrUIMG.ih_type);
   else
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBIMG), 0);
 
-  if (hdrUIMG.ih_comp < IH_COMP::IH_COMP_COUNT)
-    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBCOMP), hdrUIMG.ih_comp);
+  if (lpCurrentItem->hdrUIMG.ih_comp < IH_COMP::IH_COMP_COUNT)
+    ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBCOMP), lpCurrentItem->hdrUIMG.ih_comp);
   else
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_UBCOMP), 0);
 }
 
-static BOOL UpdateDataView(HWND hDlg)
+static void ClearView() {
+  //HW Group
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_WHVER), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_WHTIME), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_WHTIME_RO), L"");
+  ComboBox_SetCurSel(GetDlgItem(hDlgFmt, IDC_CB_WHTYPE), 0);
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_WHSIZE), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_WHCRC), L"");
+
+  //UBoot group
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBHDRCRC), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBDATCRC), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBSIZE), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBTIME), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBTIME_RO), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBNAME), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBLOAD), L"");
+  SetWindowTextW(GetDlgItem(hDlgFmt, IDC_EDIT_UBEP), L"");
+  ComboBox_SetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBOS), 0);
+  ComboBox_SetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBARCH), 0);
+  ComboBox_SetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBIMG), 0);
+  ComboBox_SetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBCOMP), 0);
+}
+
+static BOOL UpdateDataView()
 {
-  if (lpData_WHWH == NULL)
-  {
-    hdrWHWH = *(PHW_HDR)lpItemData;
+  ClearView();
 
-    if (hdrWHWH.u32Magic != HWNP_WHWH_MAGIC) return FALSE;
+  if (lpCurrentItem == NULL) return FALSE;
 
-    lpData_WHWH = malloc(hdrWHWH.u32RearSize);
-    if (lpData_WHWH == NULL) return FALSE;
-    memcpy_s(lpData_WHWH, hdrWHWH.u32RearSize, MakePointer32(lpItemData, sizeof(HW_HDR)), hdrWHWH.u32RearSize);
-  }
+  EnableWindow_UBootGroup(hDlgFmt, lpCurrentItem->bIsImg);
 
-  if (hdrWHWH.u32RearSize >= sizeof(UIMG_HDR))
-  {
-    hdrUIMG = *(PUIMG_HDR)(lpData_WHWH);
-
-    if (hdrUIMG.ih_magic == IH_MAGIC_LE)
-    {
-      if (hdrWHWH.u32RearSize - sizeof(UIMG_HDR) >= BigLittleSwap32(hdrUIMG.ih_size))
-      {
-        bIsImg = TRUE;
-      }
-      else
-      {
-        bIsImg = FALSE;
-        MessageBoxW(hDlg, L"UIMG数据长度大于项目数据长度!", L"警告", MB_ICONWARNING | MB_OK);
-      }
-
-      /*
-      if (u32DataSize - (sizeof(WHWH_HDR) + sizeof(UIMG_HDR)) >= BigLittleSwap32(hdrUIMG.ih_size))
-      {
-        blUIMG = TRUE;
-      }
-      else
-      {
-        blUIMG = FALSE;
-        MessageBoxW(hDlg, L"UIMG数据长度大于项目数据长度!", L"警告", MB_ICONWARNING | MB_OK);
-      }
-      */
-    }
-    else
-      bIsImg = FALSE;
-  }
-  else
-    bIsImg = FALSE;
-
-  EnableWindow_UBootGroup(hDlg, bIsImg);
-
-  if ((bIsImg) && (lpData_UIMG == NULL))
-  {
-    lpData_UIMG = malloc(BigLittleSwap32(hdrUIMG.ih_size));
-
-    if (lpData_UIMG == NULL)
-    {
-      bIsImg = FALSE;
-      EnableWindow_UBootGroup(hDlg, bIsImg);
-    }
-    else
-    {
-      memcpy_s(lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size), MakePointer32(lpItemData, sizeof(HW_HDR) + sizeof(UIMG_HDR)), BigLittleSwap32(hdrUIMG.ih_size));
-    }
-  }
-
-  UpdateDataView_WHWH(hDlg);
-  if (bIsImg) UpdateDataView_UIMG(hDlg);
+  UpdateDataView_WHWH(hDlgFmt);
+  if (lpCurrentItem->bIsImg) UpdateDataView_UIMG(hDlgFmt);
 
   return TRUE;
 }
 
 static void SaveHeader_WHWH(HWND hDlg)
 {
+  if (lpCurrentItem == NULL) return;
+
   CHAR chTmp[MAX_PATH] = { 0 };
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_WHVER), chTmp, MAX_PATH);
-  if (strlen(chTmp) != 0) strcpy_s(hdrWHWH.chItemVersion, chTmp);
+  if (strlen(chTmp) != 0) strcpy_s(lpCurrentItem->hdrWHWH.chItemVersion, chTmp);
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_WHTIME), chTmp, MAX_PATH);
-  if (strlen(chTmp) != 0) hdrWHWH.u32Time = ScanfHex(chTmp);
+  if (strlen(chTmp) != 0) lpCurrentItem->hdrWHWH.u32Time = ScanfHex(chTmp);
 
-  hdrWHWH.u32Type = (HW_ItemType)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE));
-
+  lpCurrentItem->hdrWHWH.u32Type = (HW_ItemType)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE));
 }
 
 static void SaveHeader_UIMG(HWND hDlg)
 {
+  if (lpCurrentItem == NULL) return;
+  if (lpCurrentItem->bIsImg == FALSE) return;
+
   CHAR chTmp[MAX_PATH] = { 0 };
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBTIME), chTmp, MAX_PATH);
-  if (strlen(chTmp) != 0) hdrUIMG.ih_time = BigLittleSwap32(ScanfHex(chTmp));
+  if (strlen(chTmp) != 0) lpCurrentItem->hdrUIMG.ih_time = BigLittleSwap32(ScanfHex(chTmp));
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBLOAD), chTmp, MAX_PATH);
-  if (strlen(chTmp) != 0) hdrUIMG.ih_load = BigLittleSwap32(ScanfHex(chTmp));
+  if (strlen(chTmp) != 0) lpCurrentItem->hdrUIMG.ih_load = BigLittleSwap32(ScanfHex(chTmp));
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBEP), chTmp, MAX_PATH);
-  if (strlen(chTmp) != 0) hdrUIMG.ih_ep = BigLittleSwap32(ScanfHex(chTmp));
+  if (strlen(chTmp) != 0) lpCurrentItem->hdrUIMG.ih_ep = BigLittleSwap32(ScanfHex(chTmp));
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBNAME), chTmp, MAX_PATH);
-  if (strlen(chTmp) != 0) strcpy_s(hdrUIMG.ih_name, chTmp);
+  if (strlen(chTmp) != 0) strcpy_s(lpCurrentItem->hdrUIMG.ih_name, chTmp);
 
-  hdrUIMG.ih_os = (IH_OS)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBOS));
-  hdrUIMG.ih_arch = (IH_ARCH)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBARCH));
-  hdrUIMG.ih_type = (IH_TYPE)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBIMG));
-  hdrUIMG.ih_comp = (IH_COMP)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBCOMP));
+  lpCurrentItem->hdrUIMG.ih_os = (IH_OS)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBOS));
+  lpCurrentItem->hdrUIMG.ih_arch = (IH_ARCH)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBARCH));
+  lpCurrentItem->hdrUIMG.ih_type = (IH_TYPE)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBIMG));
+  lpCurrentItem->hdrUIMG.ih_comp = (IH_COMP)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBCOMP));
 }
 
 static void BtnSave_WHWH(HWND hDlg)
 {
+  if (lpCurrentItem == NULL) return;
+  /*
   if (lpData_WHWH == NULL) return;
 
   DWORD dwSize = sizeof(HW_HDR) + hdrWHWH.u32RearSize;
@@ -298,10 +277,12 @@ static void BtnSave_WHWH(HWND hDlg)
     SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,错误码:[%d]!", nResult);
   else
     SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存WHWH数据完成.");
+  */
 }
 
 static void BtnSave_UIMG(HWND hDlg)
 {
+  /*
   if (bIsImg && lpData_UIMG)
   {
     DWORD dwSize = sizeof(HW_HDR) + sizeof(UIMG_HDR) + BigLittleSwap32(hdrUIMG.ih_size);
@@ -343,6 +324,7 @@ static void BtnSave_UIMG(HWND hDlg)
     else
       SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存UIMG数据完成.");
   }
+  */
 }
 
 /************************************************************************/
@@ -406,22 +388,16 @@ static uint32_t InitSubItemList() {
       }
     }
 
+    // 复制HWHW数据
+    // memcpy_s(CURRENT.lpData, lpHwHdr->u32RearSize, MakePointer32(lpHwHdr, sizeof(HW_HDR)), lpHwHdr->u32RearSize);
+
+    CURRENT.lpcData = MakePointer32(lpHwHdr, sizeof(HW_HDR));
+
     // 如果存在UImage
     if (CURRENT.bIsImg && lpImgHdr) {
       CURRENT.hdrUIMG = *lpImgHdr;
 
-      CURRENT.lpData = malloc(size);
-      assert(CURRENT.lpData != NULL);
-
-      // 复制UImage数据
-      memcpy_s(CURRENT.lpData, size, MakePointer32(lpImgHdr, sizeof(UIMG_HDR)), size);
-    }
-    else {
-      CURRENT.lpData = malloc(lpHwHdr->u32RearSize);
-      assert(CURRENT.lpData != NULL);
-
-      // 复制HWHW数据
-      memcpy_s(CURRENT.lpData, lpHwHdr->u32RearSize, MakePointer32(lpHwHdr, sizeof(HW_HDR)), lpHwHdr->u32RearSize);
+      CURRENT.lpcImageData = MakePointer32(CURRENT.lpcData, sizeof(UIMG_HDR));
     }
 
     CURRENT.bIsInit = TRUE;
@@ -454,6 +430,8 @@ static uint32_t UpdateSubItemList() {
 
 #undef CURRENT
   }
+
+ 
 
   return 0;
 
@@ -575,7 +553,7 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
     ComboBox_InsertStringA(GetDlgItem(hDlg, IDC_CB_UBCOMP), i, enum_IH_COMP[i]);
   }
 
-  if (UpdateDataView(hDlg) == FALSE)
+  if (UpdateDataView() == FALSE)
   {
     Release();
     MessageBoxW(hDlg, L"解析高级数据结构出现错误!", L"警告", MB_ICONWARNING | MB_OK);
@@ -583,12 +561,14 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
     return (INT_PTR)FALSE;
   }
 
+  /*
   if (u32DataSize < sizeof(HW_HDR) + hdrWHWH.u32RearSize)
   {
     //EnableWindow(hDlg, FALSE);
     MessageBoxW(hDlg, L"WHWH数据长度大于项目数据长度!", L"错误", MB_ICONERROR | MB_OK);
     return (INT_PTR)TRUE;
   }
+  */
 
   return (INT_PTR)TRUE;
 
@@ -596,10 +576,16 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
 
 void SubItemChanged(LPNMTREEVIEW lpnmTV)
 {
-  switch (lpnmTV->itemNew.lParam)
-  {
+  uint32_t index = (uint32_t)lpnmTV->itemNew.lParam;
 
+  if (index < nSubItem) {
+    lpCurrentItem = &lpSubItem[index];
   }
+  else {
+    lpCurrentItem = NULL;
+  }
+
+  UpdateDataView();
 }
 
 /*
@@ -614,7 +600,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
     return InitDlg(hDlg, (uint32_t)lParam);
 
   case WM_SHOWWINDOW:
-    if ((wParam) && (lParam == SW_PARENTOPENING)) UpdateDataView(hDlg);
+    if ((wParam) && (lParam == SW_PARENTOPENING)) UpdateDataView();
     break;
 
   case WM_COMMAND:
@@ -629,27 +615,33 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       {
         uint32_t u32CRC;
 
-        u32CRC = crc32_fast(lpData_WHWH, hdrWHWH.u32RearSize);
+        if (lpCurrentItem) {
+          u32CRC = crc32_fast(lpCurrentItem->lpcData, lpCurrentItem->hdrWHWH.u32RearSize);
 
-        if (u32CRC == hdrWHWH.u32RearCRC)
-          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH数据CRC32检查正确.");
-        else
-          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH数据CRC32检查不正确, 计算结果:0x%08X!", u32CRC);
+          if (u32CRC == lpCurrentItem->hdrWHWH.u32RearCRC)
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH数据CRC32检查正确.");
+          else
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH数据CRC32检查不正确, 计算结果:0x%08X!", u32CRC);
+        }
+        else {
+          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"无效的子项目!");
+        }
+
       }
       break;
 
       case IDC_BTN_UBCH:    //检查UIMG头部CRC32
-        if (bIsImg)
+        if (lpCurrentItem && lpCurrentItem->bIsImg)
         {
           uint32_t u32CRC;
           UIMG_HDR hdrTmp;
 
-          hdrTmp = hdrUIMG;
+          hdrTmp = lpCurrentItem->hdrUIMG;
           hdrTmp.ih_hcrc = 0;
 
           u32CRC = crc32_fast(&hdrTmp, sizeof(UIMG_HDR));
 
-          if (u32CRC == BigLittleSwap32(hdrUIMG.ih_hcrc))
+          if (u32CRC == BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_hcrc))
             SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG头部CRC32检查正确.");
           else
             SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG头部CRC32检查不正确, 计算结果:%08X (LE)!", u32CRC);
@@ -657,13 +649,13 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
         break;
 
       case IDC_BTN_UBCD:    //检查UIMG数据CRC32
-        if (bIsImg)
+        if (lpCurrentItem && lpCurrentItem->bIsImg)
         {
           uint32_t u32CRC;
 
-          u32CRC = crc32_fast(lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size));
+          u32CRC = crc32_fast(lpCurrentItem->lpcImageData, BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_size));
 
-          if (u32CRC == BigLittleSwap32(hdrUIMG.ih_dcrc))
+          if (u32CRC == BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_dcrc))
             SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG数据CRC32检查正确.");
           else
             SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG数据CRC32检查不正确, 计算结果:%08X (LE)!", u32CRC);
@@ -672,64 +664,24 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
       case IDC_BTN_WHEXP:   //导出WHWH数据
       {
-        WCHAR wsTmp[MAX_PATH] = { 0 };
+        if (lpCurrentItem) {
+          WCHAR wsTmp[MAX_PATH] = { 0 };
 
-        if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
-        {
-          if (ExportToFile(wsTmp, lpData_WHWH, hdrWHWH.u32RearSize))
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据完成.");
-          else
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据失败,错误码:[%d]!", GetLastError());
+          if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
+          {
+            if (ExportToFile(wsTmp, lpCurrentItem->lpcData, lpCurrentItem->hdrWHWH.u32RearSize))
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据完成.");
+            else
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据失败,错误码:[%d]!", GetLastError());
+          }
         }
       }
       break;
 
       case IDC_BTN_WHIMP:   //导入WHWH数据
       {
-        LPVOID lpData;
-        DWORD dwDataSize;
-        WCHAR wsTmp[MAX_PATH] = { 0 };
+        if (lpCurrentItem) {
 
-        if (GetOpenFilePath(hDlg, wsTmp, MAX_PATH))
-        {
-          if (ImportFromFile(wsTmp, &lpData, &dwDataSize) == FALSE)
-          {
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"打开文件失败,错误码:[%d]!", GetLastError());
-            break;
-          }
-
-          SaveHeader_WHWH(hDlg);
-
-          if (lpData_WHWH) free(lpData_WHWH);
-
-          lpData_WHWH = lpData;
-          hdrWHWH.u32RearSize = dwDataSize;
-          hdrWHWH.u32RearCRC = crc32_fast(lpData, dwDataSize);
-
-          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导入WHWH数据完成.");
-          UpdateDataView(hDlg);
-        }
-      }
-      break;
-
-      case IDC_BTN_UBEXP:   //导出UIMG数据
-        if (bIsImg)
-        {
-          WCHAR wsTmp[MAX_PATH] = { 0 };
-
-          if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
-          {
-            if (ExportToFile(wsTmp, lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size)))
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出UIMG数据完成.");
-            else
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出UIMG数据失败,错误码:[%d]!", GetLastError());
-          }
-        }
-        break;
-
-      case IDC_BTN_UBIMP:   //导入UIMG数据
-        if (bIsImg)
-        {
           LPVOID lpData;
           DWORD dwDataSize;
           WCHAR wsTmp[MAX_PATH] = { 0 };
@@ -743,11 +695,56 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
             }
 
             SaveHeader_WHWH(hDlg);
+
+            if (lpCurrentItem->lpData) free(lpCurrentItem->lpData);
+
+            lpCurrentItem->lpData = lpData;
+            lpCurrentItem->hdrWHWH.u32RearSize = dwDataSize;
+            lpCurrentItem->hdrWHWH.u32RearCRC = crc32_fast(lpData, dwDataSize);
+
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导入WHWH数据完成.");
+            UpdateDataView();
+          }
+        }
+      }
+      break;
+
+      case IDC_BTN_UBEXP:   //导出UIMG数据
+        if (lpCurrentItem && lpCurrentItem->bIsImg)
+        {
+          WCHAR wsTmp[MAX_PATH] = { 0 };
+
+          if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
+          {
+            if (ExportToFile(wsTmp, lpCurrentItem->lpcImageData, BigLittleSwap32(lpCurrentItem->hdrUIMG.ih_size)))
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出UIMG数据完成.");
+            else
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出UIMG数据失败,错误码:[%d]!", GetLastError());
+          }
+        }
+        break;
+
+      case IDC_BTN_UBIMP:   //导入UIMG数据
+        if (lpCurrentItem && lpCurrentItem->bIsImg)
+        {
+          LPVOID lpData;
+          DWORD dwDataSize;
+          WCHAR wsTmp[MAX_PATH] = { 0 };
+
+          /*
+          if (GetOpenFilePath(hDlg, wsTmp, MAX_PATH))
+          {
+            if (ImportFromFile(wsTmp, &lpData, &dwDataSize) == FALSE)
+            {
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"打开文件失败,错误码:[%d]!", GetLastError());
+              break;
+            }
+
+            SaveHeader_WHWH(hDlg);
             SaveHeader_UIMG(hDlg);
 
-            if (lpData_UIMG) free(lpData_UIMG);
 
-            lpData_UIMG = lpData;
+            lpCurrentItem->lpImageData = lpData;
 
             hdrUIMG.ih_size = BigLittleSwap32(dwDataSize);
             hdrUIMG.ih_dcrc = BigLittleSwap32(crc32_fast(lpData, dwDataSize));
@@ -781,7 +778,9 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
             SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导入UIMG数据完成.");
             UpdateDataView(hDlg);
-          }
+
+           }
+          */
         }
         break;
 
@@ -795,7 +794,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
       case IDC_BTN_ADF_SAVE:    //保存WHWH 头部 + UIMG 头部 + 数据
       {
-        if (bIsImg && lpData_UIMG)
+        if (lpCurrentItem && lpCurrentItem->bIsImg && lpCurrentItem->lpImageData)
         {
           //SNDMSG(hDlg, WM_COMMAND, MAKEWPARAM(IDC_BTN_WHSAVE, BN_CLICKED), NULL);
           SaveHeader_WHWH(hDlg);
@@ -818,9 +817,10 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       }
       break;
       }
+
     }
+    break;
   }
-  break;
 
   case WM_NOTIFY:
   {
@@ -830,12 +830,38 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
     switch (lpNm->code)
     {
-    case TVN_SELCHANGED:
-    {
+    case TVN_SELCHANGED: {
       SubItemChanged((LPNMTREEVIEW)lParam);
+      break;
     }
-    break;
+    case NM_CUSTOMDRAW: {
+      if (wParam == IDC_TV_SUBITEM)
+      {
+        LPNMTVCUSTOMDRAW lpCustomDraw = (LPNMTVCUSTOMDRAW)lParam;
+
+        switch (lpCustomDraw->nmcd.dwDrawStage)
+        {
+        case CDDS_PREPAINT:
+          SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+          return TRUE;
+        case CDDS_ITEMPREPAINT:
+          if (CHK_FLAGS(lpCustomDraw->nmcd.uItemState, CDIS_SELECTED)) {
+            lpCustomDraw->clrText = RGB(255, 40, 40);
+            lpCustomDraw->clrTextBk = RGB(192, 192, 192);
+          }
+          else {
+            lpCustomDraw->clrText = RGB(20, 20, 20);
+            lpCustomDraw->clrTextBk = RGB(242, 242, 242);
+          }
+
+          //SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_SKIPDEFAULT);
+          return TRUE;
+        }
+      }
+      break;
     }
+    }
+
   }
   break;
 

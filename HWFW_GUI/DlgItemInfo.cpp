@@ -226,7 +226,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
       if (lpDlgIIS->dtType == DT_EDIT)
       {
         SaveItemInfo(hDlg);
-        DialogBoxParam(hInst, MAKEINTRESOURCE(IDC_BTN_ADF), hDlg, &DlgProc_AdvDatFmt, (LPARAM)lpDlgIIS->u32Index);
+        DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_ADVFMTDLG), hDlg, &DlgProc_AdvDatFmt, (LPARAM)lpDlgIIS->u32Index);
         UpdateView(hDlg);
       }
       break;

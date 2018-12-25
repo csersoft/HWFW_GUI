@@ -308,6 +308,34 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
       }
     }
     break;
+
+    case NM_CUSTOMDRAW: 
+    {
+      if (wParam == IDC_TV)
+      {
+        LPNMTVCUSTOMDRAW lpCustomDraw = (LPNMTVCUSTOMDRAW)lParam;
+
+        switch (lpCustomDraw->nmcd.dwDrawStage)
+        {
+        case CDDS_PREPAINT:
+          SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_NOTIFYITEMDRAW);
+          return TRUE;
+        case CDDS_ITEMPREPAINT:
+          if (CHK_FLAGS(lpCustomDraw->nmcd.uItemState, CDIS_SELECTED)) {
+            lpCustomDraw->clrText = RGB(255, 40, 40);
+            lpCustomDraw->clrTextBk = RGB(192, 192, 192);
+          }
+          else {
+            lpCustomDraw->clrText = RGB(20, 20, 20);
+            lpCustomDraw->clrTextBk = RGB(242, 242, 242);
+          }
+
+          //SetWindowLongPtr(hDlg, DWLP_MSGRESULT, CDRF_SKIPDEFAULT);
+          return TRUE;
+        }
+      }
+    }
+    break;
     }
   }
   break;

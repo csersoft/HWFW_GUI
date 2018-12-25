@@ -79,13 +79,16 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>copy HWPDB.ini "$(OutDir)HWPDB.ini"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>$(ProjectDir)app.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -102,13 +105,16 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>copy HWPDB.ini "$(OutDir)HWPDB.ini"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>$(ProjectDir)app.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_LLVM|Win32'">
     <ClCompile>
@@ -125,13 +131,16 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>copy HWPDB.ini "$(OutDir)HWPDB.ini"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>$(ProjectDir)app.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="Licenses\gpl-3.0-chs.txt" />
@@ -181,6 +190,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="HWPDB.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="app.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

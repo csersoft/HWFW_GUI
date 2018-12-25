@@ -6,11 +6,11 @@ INT_PTR CALLBACK DlgProc_About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
   switch (message)
   {
   case WM_INITDIALOG:
-  return TRUE;
+    return TRUE;
 
   case WM_CLOSE:
-  EndDialog(hDlg, IDCLOSE);
-  break;
+    EndDialog(hDlg, IDCLOSE);
+    break;
   }
 
   return (INT_PTR)FALSE;
