@@ -189,7 +189,7 @@ int UpdateView()
   tvis.item.lParam = (LPARAM)TT_FILEHDR;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
-  tvis.item.pszText = L"<型号支持信息>";
+  tvis.item.pszText = L"<产品支持信息>";
   tvis.item.lParam = (LPARAM)TT_MODELINFO;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 

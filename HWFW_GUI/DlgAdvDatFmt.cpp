@@ -5,14 +5,20 @@
 /* WHWH子项目                                                           */
 /************************************************************************/
 typedef struct {
+  //子项目是否初始化
   BOOL          bIsInit = FALSE;
+  //子项目是否UImage格式
   BOOL          bIsImg = FALSE;
+  //华为头
   HW_HDR        hdrWHWH;
+  //UImage头
   UIMG_HDR      hdrUIMG;
+  //指向华为数据 (xxx || uimage hdr + uimage data)
   LPCVOID       lpcData = NULL;
+  //指向uimage数据 (uimage data)
   LPCVOID       lpcImageData = NULL;
-  LPVOID        lpData = NULL;
-  LPVOID        lpImageData = NULL;
+  //完整的数据
+  LPVOID        lpRawData = NULL;
 } SUBITEM_OBJ, *PSUBITEM_OBJ;
 
 
@@ -39,29 +45,17 @@ static void Release()
 
   if (lpSubItem && nSubItem) {
     for (uint32_t i = 0; i < nSubItem; i++) {
-      //lpSubItem[i]
+      if (lpSubItem[i].lpRawData) {
+        free(lpSubItem[i].lpRawData);
+        lpSubItem[i].lpRawData = NULL;
+      }
     }
   }
 
-  /*
-  if (lpSubItem) {
-    free(lpSubItem);
-    lpSubItem = NULL;
-    lpCurrentItem = NULL;
-  }
-
-  if (lpData_WHWH)
-  {
-    free(lpData_WHWH);
-    lpData_WHWH = NULL;
-  }
-
-  if (lpData_UIMG)
-  {
-    free(lpData_UIMG);
-    lpData_UIMG = NULL;
-  }
-  */
+  free(lpSubItem);
+  lpSubItem = NULL;
+  lpCurrentItem = NULL;
+  nSubItem = 0;
 }
 
 static void EnableWindow_UBootGroup(HWND hDlg, BOOL blEnable)
