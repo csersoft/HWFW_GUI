@@ -12,7 +12,7 @@ typedef struct _HuaWeiSubItemObject {
   //项目总大小 (HW_HDR + UIMG_HDR + UIMG_Data)
   size_t        u32TotalSize = 0;
   //指向华为数据 (xxx || uimage hdr + uimage data)
-  LPCVOID       lpcData = NULL;
+  LPCVOID       lpcHuaWeiData = NULL;
   //指向uimage数据 (uimage data)
   LPCVOID       lpcImageData = NULL;
   //完整的数据
@@ -217,8 +217,11 @@ static int ImportData_WHWH() {
 
   __try {
     BOOL bIsImg;
-    size_t size;
-    PUIMG_HDR lpImgHdr;
+    size_t size, sizeData;
+    uint32_t index;
+    LPBYTE lpMem;
+    LPCVOID lpHuaWei = NULL, lpImage = NULL;
+    PUIMG_HDR lpImgHdr = NULL;
     WCHAR wsTmp[MAX_PATH] = { 0 };
 
     if (GetOpenFilePath(hDlgFmt, wsTmp, MAX_PATH))
@@ -236,15 +239,15 @@ static int ImportData_WHWH() {
 
         // 判断是否uImage
         if (lpImgHdr->ih_magic == IH_MAGIC_LE) {
-          size = BigLittleSwap32(lpImgHdr->ih_size);
+          sizeData = BigLittleSwap32(lpImgHdr->ih_size);
 
-          if (dwDataSize < sizeof(UIMG_HDR) + size) {
+          if (dwDataSize < sizeof(UIMG_HDR) + sizeData) {
             SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"uImage格式数据长度不合法!");
             return -2;
           }
 
           bIsImg = TRUE;
-          size = sizeof(HW_HDR) + sizeof(UIMG_HDR) + BigLittleSwap32(lpImgHdr->ih_size);
+          size = sizeof(HW_HDR) + sizeof(UIMG_HDR) + sizeData;
         }
       }
 
@@ -252,17 +255,43 @@ static int ImportData_WHWH() {
         size = sizeof(HW_HDR) + dwDataSize;
       }
 
+      lpMem = (LPBYTE)malloc(size);
+
+      if (lpMem == NULL) {
+        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"分配内存失败!");
+        return -3;
+      }
+
+      index = 0;
+
+      memcpy_s(&lpMem[index], size, &lpCurrentItem->hdrHuaWei, sizeof(HW_HDR));
+      index += sizeof(HW_HDR);
+
+      lpHuaWei = &lpMem[index];
+
+      if (bIsImg) {
+        lpCurrentItem->hdrImage = *lpImgHdr;
+
+        memcpy_s(&lpMem[index], size - index, lpImgHdr, sizeof(UIMG_HDR));
+        index += sizeof(UIMG_HDR);
+
+        lpImage = &lpMem[index];
+        memcpy_s(&lpMem[index], size - index, MakePointer32(lpImgHdr, sizeof(UIMG_HDR)), sizeData);
+      }
+      else {
+        memcpy_s(&lpMem[index], size - index, lpData, dwDataSize);
+      }
+
       if (lpCurrentItem->lpRawData) free(lpCurrentItem->lpRawData);
 
-      lpCurrentItem->lpRawData = malloc(size);
+      lpCurrentItem->bIsImage = bIsImg;
+      lpCurrentItem->lpcHuaWeiData = lpHuaWei;
+      lpCurrentItem->lpcImageData = lpImage;
+      lpCurrentItem->lpRawData = lpMem;
+      lpCurrentItem->hdrHuaWei.u32RearSize = size - sizeof(HW_HDR);
+      lpCurrentItem->hdrHuaWei.u32RearCRC = crc32_fast(lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize);
 
       SaveHeader_WHWH(hDlgFmt);
-
-      //if (lpCurrentItem->lpData) free(lpCurrentItem->lpData);
-
-      lpCurrentItem->lpData = lpData;
-      lpCurrentItem->hdrHuaWei.u32RearSize = dwDataSize;
-      lpCurrentItem->hdrHuaWei.u32RearCRC = crc32_fast(lpData, dwDataSize);
 
       SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"导入WHWH数据完成.");
       UpdateDataView();
@@ -457,13 +486,13 @@ static uint32_t InitSubItemList() {
     // 复制HWHW数据
     // memcpy_s(CURRENT.lpData, lpHwHdr->u32RearSize, MakePointer32(lpHwHdr, sizeof(HW_HDR)), lpHwHdr->u32RearSize);
 
-    CURRENT.lpcData = MakePointer32(lpHwHdr, sizeof(HW_HDR));
+    CURRENT.lpcHuaWeiData = MakePointer32(lpHwHdr, sizeof(HW_HDR));
 
     // 如果存在UImage
     if (CURRENT.bIsImage && lpImgHdr) {
       CURRENT.hdrImage = *lpImgHdr;
 
-      CURRENT.lpcImageData = MakePointer32(CURRENT.lpcData, sizeof(UIMG_HDR));
+      CURRENT.lpcImageData = MakePointer32(CURRENT.lpcHuaWeiData, sizeof(UIMG_HDR));
     }
 
     CURRENT.bIsInit = TRUE;
@@ -697,7 +726,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
         uint32_t u32CRC;
 
         if (lpCurrentItem) {
-          u32CRC = crc32_fast(lpCurrentItem->lpcData, lpCurrentItem->hdrHuaWei.u32RearSize);
+          u32CRC = crc32_fast(lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize);
 
           if (u32CRC == lpCurrentItem->hdrHuaWei.u32RearCRC)
             SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH数据CRC32检查正确.");
@@ -750,7 +779,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
           if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
           {
-            if (ExportToFile(wsTmp, lpCurrentItem->lpcData, lpCurrentItem->hdrHuaWei.u32RearSize))
+            if (ExportToFile(wsTmp, lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize))
               SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据完成.");
             else
               SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据失败,错误码:[%d]!", GetLastError());
