@@ -161,6 +161,7 @@
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="DlgAbout.cpp" />
     <ClCompile Include="DlgAdvDatFmt.cpp" />
+    <ClCompile Include="DlgEditProduct.cpp" />
     <ClCompile Include="DlgItemInfo.cpp" />
     <ClCompile Include="DlgMain.cpp" />
     <ClCompile Include="FastCRC32.cpp">

@@ -189,6 +189,12 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
       }
       break;
 
+      case IDM_EDIT_PL:
+        if (HWNP_GetState() == -1) {
+          DialogBox(hInst, MAKEINTRESOURCE(IDD_PROD), hDlg, &DlgProc_EditProduct);
+        }
+        break;
+
       case IDM_PII_ADD:
       {
         WCHAR wsTmp[MAX_PATH] = { 0 };
