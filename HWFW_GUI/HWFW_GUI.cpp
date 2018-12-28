@@ -174,7 +174,7 @@ void CleanView()
 
 int UpdateView()
 {
-  HTREEITEM htiLastItem;
+  HTREEITEM htiDefault, htiLastItem;
   TVINSERTSTRUCTW tvis;
 
   if (HWNP_GetState() != -1) return -1;
@@ -187,7 +187,7 @@ int UpdateView()
 
   tvis.item.pszText = L"<固件文件头部>";
   tvis.item.lParam = (LPARAM)TT_FILEHDR;
-  htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
+  htiDefault = htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
   tvis.item.pszText = L"<产品支持信息>";
   tvis.item.lParam = (LPARAM)TT_MODELINFO;
@@ -197,6 +197,7 @@ int UpdateView()
   tvis.item.lParam = (LPARAM)TT_ITEMINFO;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
+  TreeView_DlgSelectItem(hMainDlg, IDC_TV, htiDefault);
   return 0;
 }
 
@@ -215,5 +216,6 @@ void OpenFirmware(LPCWSTR lpPath)
     SetStatus(L"更新视图失败!错误码:[%d]", nResult);
     return ;
   }
+
 }
 

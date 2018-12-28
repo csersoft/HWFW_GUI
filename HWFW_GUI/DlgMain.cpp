@@ -83,7 +83,6 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
       strcpy_s(lpStr, MAX_PATH - (lpStr - chIniPath), "HWPDB.ini");
     }
 
-
     TreeView_SetProc(GetDlgItem(hDlg, IDC_TV));
   }
   return (INT_PTR)TRUE;

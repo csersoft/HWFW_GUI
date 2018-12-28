@@ -83,6 +83,9 @@
     <ClCompile Include="DlgMain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Common.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HWFW_GUI.rc">

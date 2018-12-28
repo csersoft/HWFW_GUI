@@ -110,3 +110,11 @@ static inline DWORD ScanfHex(LPCCH lpString)
 
   return dwHex;
 }
+
+/************************************************************************/
+/* 页对齐                                                               */
+/************************************************************************/
+static inline uint32_t alignPage(uint32_t val) {
+  if (val % 0x1000 == 0) return val;
+  return (val / 0x1000 + 1) * 0x1000;
+}

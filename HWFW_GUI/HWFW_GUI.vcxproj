@@ -158,6 +158,7 @@
     <ClInclude Include="uboot_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Common.cpp" />
     <ClCompile Include="DlgAbout.cpp" />
     <ClCompile Include="DlgAdvDatFmt.cpp" />
     <ClCompile Include="DlgItemInfo.cpp" />

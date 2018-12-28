@@ -57,6 +57,9 @@
 #define TreeView_DlgInsertItemW(hwnd, item, lpis) \
   (HTREEITEM)::SendDlgItemMessageW((hwnd), (int)(item), TVM_INSERTITEMW, 0, (LPARAM)(lpis))
 
+#define TreeView_DlgSelectItem(hwnd, item, hitem) \
+    (BOOL)::SendDlgItemMessage((hwnd), (int)(item), TVM_SELECTITEM, (WPARAM)TVGN_CARET, (LPARAM)(HTREEITEM)(hitem))
+
 #define ListView_InsertColumnW(hwnd, iCol, pcol) \
   (int)::SendMessageW((hwnd), LVM_INSERTCOLUMNW, (WPARAM)(iCol), (LPARAM)(pcol))
 

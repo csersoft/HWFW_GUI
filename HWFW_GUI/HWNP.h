@@ -36,7 +36,7 @@
 #define CHK_OUT_OF_UBOUND(pointer, start, size)             ((size_t)(pointer) >= ((size_t)(start) + (size_t)(size)))                       //检查上标越界
 #define CHK_OUT_OF_UBOUND2(pointer, len, start, size)       (((size_t)(pointer) + (size_t)(len))  > ((size_t)(start) + (size_t)(size)))     //检查上标越界
 
-#define BigLittleSwap32(int32)                              ((((uint32_t)(int32) & 0xff000000U) >> 24) | \
+#define EndianSwap32(int32)                                 ((((uint32_t)(int32) & 0xff000000U) >> 24) | \
                                                             (((uint32_t)(int32) & 0x00ff0000U) >> 8) | \
                                                             (((uint32_t)(int32) & 0x0000ff00U) << 8) | \
                                                             (((uint32_t)(int32) & 0x000000ffU) << 24))
@@ -333,3 +333,6 @@ int           HWNP_Save();
 
 //保存到其它文件
 int           HWNP_SaveAs(__in LPCWSTR lpFilePath);
+
+//校准uImage Header CRC32
+int           HWNP_CalibrationImageHeaderCrc32(__inout PUIMG_HDR lpImageHdr);

@@ -19,9 +19,9 @@ static void ListFileHeader(HWND hListView)
   ListView_SetExtendedListViewStyle(hListView, LVS_EX_DEFAULT);
 
 
-  ListView_AddColumn(hListView, 96, 0, L"文件偏移");
-  ListView_AddColumn(hListView, 256, 1, L"成员数值");
-  ListView_AddColumn(hListView, 384, 2, L"成员描述");
+  ListView_AddColumn(hListView, 128, 0, L"文件偏移");
+  ListView_AddColumn(hListView, 264, 1, L"成员数值");
+  ListView_AddColumn(hListView, 460, 2, L"成员描述");
 
   if (HWNP_GetFirmwareHeader(&fwHeader) != 0) return;
 
@@ -35,7 +35,7 @@ static void ListFileHeader(HWND hListView)
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, BasicFileHeader.beu32FileSize));
   ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
-  swprintf_s(wsTemp, SF_HEX_DEC, BigLittleSwap32(fwHeader.BasicFileHeader.beu32FileSize), BigLittleSwap32(fwHeader.BasicFileHeader.beu32FileSize));
+  swprintf_s(wsTemp, SF_HEX_DEC, EndianSwap32(fwHeader.BasicFileHeader.beu32FileSize), EndianSwap32(fwHeader.BasicFileHeader.beu32FileSize));
   ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
   ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"FileSize         #  文件大小  (Big-Endian)", LT_NONE, 0, 0, 0);
 
@@ -72,14 +72,14 @@ static void ListFileHeader(HWND hListView)
   ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX8, LOBYTE(fwHeader.PacketHeader.u8PackTotal));
   ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"PackTotal        #  PackTotal  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"PackTotal        #  PackTotal", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u8PackNum));
   ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX8, LOBYTE(fwHeader.PacketHeader.u8PackNum));
   ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"PackNum          #  PackNum  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"PackNum          #  PackNum", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u16ProductListSize));
@@ -336,9 +336,6 @@ void UpdateItemInfo(HWND hListView)
 
 static LRESULT CALLBACK TreeView_WndProc(HWND hCtrl, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  if (!wfnTV)
-    return DefWindowProc(hCtrl, Msg, wParam, lParam);
-
   if (Msg == WM_DROPFILES)
   {
     WCHAR wsFile[MAX_PATH];
@@ -362,7 +359,8 @@ static LRESULT CALLBACK TreeView_WndProc(HWND hCtrl, UINT Msg, WPARAM wParam, LP
     DragFinish((HDROP)wParam);
     return 0;
   }
-
+   
+  if (!wfnTV) return DefWindowProc(hCtrl, Msg, wParam, lParam);
   return CallWindowProc(wfnTV, hCtrl, Msg, wParam, lParam);
 }
 

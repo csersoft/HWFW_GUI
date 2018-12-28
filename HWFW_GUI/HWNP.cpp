@@ -76,7 +76,7 @@ static inline void HWNP_UpdateHeader()
 
   //计算文件大小
   u32Tmp = (sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO) + u32DataSize) - 76;
-  hwHeader.BasicFileHeader.beu32FileSize = BigLittleSwap32(u32Tmp);
+  hwHeader.BasicFileHeader.beu32FileSize = EndianSwap32(u32Tmp);
 
   //计算文件CRC
   u32CRC = crc32_fast(&hwHeader.FileHeader2, sizeof(HWNP_FILEHDR2));
@@ -697,5 +697,18 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
   }
 
   CloseHandle(hNewFile);
+  return 0;
+}
+
+int HWNP_CalibrationImageHeaderCrc32(PUIMG_HDR lpImageHdr) {
+  UIMG_HDR hdrTmp;
+
+  if (lpImageHdr == NULL) return -1;
+  if (lpImageHdr->ih_magic != IH_MAGIC_LE) return -2;
+
+  hdrTmp = *lpImageHdr;
+  hdrTmp.ih_hcrc = 0;
+
+  lpImageHdr->ih_hcrc = EndianSwap32(crc32_fast(&hdrTmp, sizeof(UIMG_HDR)));
   return 0;
 }
