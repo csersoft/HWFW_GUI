@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "HWFW_GUI.hpp"
 
-static uint32_t MemAlignCpy(LPVOID const dest, size_t const destSize, LPCVOID const src, size_t const srcSize, int fill) {
+uint32_t MemAlignCpy(LPVOID const dest, size_t const destSize, LPCVOID const src, size_t const srcSize, int fill) {
   size_t alignSize, fillSize;
 
   alignSize = alignPage(srcSize);

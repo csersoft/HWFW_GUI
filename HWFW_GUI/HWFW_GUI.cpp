@@ -36,6 +36,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
   UNREFERENCED_PARAMETER(lpCmdLine);
 
   InitCommonControls();
+  _CrtSetDebugFillThreshold(0);
 
   // 执行应用程序初始化: 
   if (!InitInstance(hInstance, nCmdShow))

@@ -12,12 +12,15 @@ static void SaveItemInfo(HWND hDlg)
   if (strlen(chTmp) != 0) hwItemInfo.u32Id = ScanfDec(chTmp);
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_PATH), chTmp, MAX_PATH);
+  memset(hwItemInfo.chItemPath, 0, sizeof(HWNP_ITEMINFO::chItemPath));
   if (strlen(chTmp) != 0) strcpy_s(hwItemInfo.chItemPath, chTmp);
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_CB_TYPE), chTmp, MAX_PATH);
+  memset(hwItemInfo.chItemType, 0, sizeof(HWNP_ITEMINFO::chItemType));
   if (strlen(chTmp) != 0) strcpy_s(hwItemInfo.chItemType, chTmp);
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_VER), chTmp, MAX_PATH);
+  memset(hwItemInfo.chItemVersion, 0, sizeof(HWNP_ITEMINFO::chItemVersion));
   if (strlen(chTmp) != 0) strcpy_s(hwItemInfo.chItemVersion, chTmp);
 
   GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_POLICY), chTmp, MAX_PATH);

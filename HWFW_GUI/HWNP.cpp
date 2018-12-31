@@ -397,9 +397,22 @@ int HWNP_SetItemInfo(__in uint32_t u32Index, __in uint32_t u32Mask, __in uint32_
   if (CHK_FLAGS(u32Mask, IIFLAG_VERSION) && (lpchVersion == NULL)) return (nLastError = -1105);
 
   if (CHK_FLAGS(u32Mask, IIFLAG_ID)) lpItemCopy[u32Index].ItemInfo.u32Id = u32Id;
-  if (CHK_FLAGS(u32Mask, IIFLAG_PATH)) strcpy_s(lpItemCopy[u32Index].ItemInfo.chItemPath, sizeof(HWNP_ITEMINFO::chItemPath), lpchPath);
-  if (CHK_FLAGS(u32Mask, IIFLAG_TYPE)) strcpy_s(lpItemCopy[u32Index].ItemInfo.chItemType, sizeof(HWNP_ITEMINFO::chItemType), lpchType);
-  if (CHK_FLAGS(u32Mask, IIFLAG_VERSION)) strcpy_s(lpItemCopy[u32Index].ItemInfo.chItemVersion, sizeof(HWNP_ITEMINFO::chItemVersion), lpchVersion);
+
+  if (CHK_FLAGS(u32Mask, IIFLAG_PATH)) {
+    memset(lpItemCopy[u32Index].ItemInfo.chItemPath, 0, sizeof(HWNP_ITEMINFO::chItemPath));
+    strcpy_s(lpItemCopy[u32Index].ItemInfo.chItemPath, sizeof(HWNP_ITEMINFO::chItemPath), lpchPath);
+  }
+
+  if (CHK_FLAGS(u32Mask, IIFLAG_TYPE)) {
+    memset(lpItemCopy[u32Index].ItemInfo.chItemType, 0, sizeof(HWNP_ITEMINFO::chItemType));
+    strcpy_s(lpItemCopy[u32Index].ItemInfo.chItemType, sizeof(HWNP_ITEMINFO::chItemType), lpchType);
+  }
+
+  if (CHK_FLAGS(u32Mask, IIFLAG_VERSION)) {
+    memset(lpItemCopy[u32Index].ItemInfo.chItemVersion, 0, sizeof(HWNP_ITEMINFO::chItemVersion));
+    strcpy_s(lpItemCopy[u32Index].ItemInfo.chItemVersion, sizeof(HWNP_ITEMINFO::chItemVersion), lpchVersion);
+  }
+
   if (CHK_FLAGS(u32Mask, IIFLAG_POLICY)) lpItemCopy[u32Index].ItemInfo.u32Policy = u32Policy;
   if (CHK_FLAGS(u32Mask, IIFLAG_RESERVED)) lpItemCopy[u32Index].ItemInfo.u32Reserved = u32Reserved;
 

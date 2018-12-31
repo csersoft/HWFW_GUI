@@ -289,6 +289,7 @@ static int ImportData_WHWH() {
       lpCurrentItem->lpRawData = lpMem;
       lpCurrentItem->hdrHuaWei.u32RearSize = size - sizeof(HW_HDR);
       lpCurrentItem->hdrHuaWei.u32RearCRC = crc32_fast(lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize);
+      lpCurrentItem->u32TotalSize = size;
 
       SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"导入WHWH数据完成.");
       UpdateDataView();
@@ -363,7 +364,7 @@ static int ImportData_UIMG() {
       lpCurrentItem->hdrImage = hdrImage;
       lpCurrentItem->hdrHuaWei.u32RearSize = size - sizeof(HW_HDR);
       lpCurrentItem->hdrHuaWei.u32RearCRC = crc32_fast(lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize);
-
+      lpCurrentItem->u32TotalSize = size;
 
       SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"导入UIMG数据完成.");
       UpdateDataView();
@@ -374,50 +375,148 @@ static int ImportData_UIMG() {
   }
 }
 
-static void SaveHeader_WHWH(HWND hDlg)
+/************************************************************************/
+/* 保存子项目                                                           */
+/* alignMode: 1,Margin; 2,Padding                                       */
+/************************************************************************/
+static int SaveSubItem(int alignMode) {
+  if (lpSubItem == NULL) return -1;
+  if (nSubItem == 0) return -2;
+
+  int nResult;
+  uint32_t size = 0, offset, index, tmp, offset2;
+  LPVOID lpMem, lpItem;
+
+  for (uint32_t i = 0; i < nSubItem; i++) {
+#define CURRENT     (lpSubItem[i])
+    if (CURRENT.bIsInit == FALSE) break;
+
+    size += alignPage(CURRENT.u32TotalSize);
+#undef CURRENT
+  }
+
+  if (size == 0) return -3;
+
+  lpMem = malloc(size);
+
+  index = 0;
+  offset = 0;
+
+  while (index < nSubItem && offset < size) {
+#define CURRENT     (lpSubItem[index])
+    if (CURRENT.bIsInit == FALSE) continue;
+
+    lpItem = NULL;
+    tmp = 0;
+
+    __try {
+      lpItem = malloc(CURRENT.u32TotalSize);
+      assert(lpItem != NULL);
+
+      offset2 = 0;
+
+      memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, &(CURRENT.hdrHuaWei), sizeof(HW_HDR));
+      offset2 += sizeof(HW_HDR);
+
+      if (CURRENT.bIsImage) {
+        memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, &(CURRENT.hdrImage), sizeof(UIMG_HDR));
+        offset2 += sizeof(UIMG_HDR);
+
+        tmp = EndianSwap32(CURRENT.hdrImage.ih_size);
+        memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, CURRENT.lpcImageData, tmp);
+        offset2 += tmp;
+      }
+      else {
+        memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, CURRENT.lpcHuaWeiData, CURRENT.hdrHuaWei.u32RearSize);
+        offset2 += CURRENT.hdrHuaWei.u32RearSize;
+      }
+
+      tmp = MemAlignCpy(MakePointer32(lpMem, offset), size - offset, lpItem, offset2, 0xFF);
+    }
+    __finally {
+      free(lpItem);
+    }
+
+    offset += tmp;
+    index++;
+#undef CURRENT
+  }
+
+  nResult = HWNP_SetItemData(u32ItemIdx, lpMem, size);
+
+  free(lpMem);
+
+  if (nResult != 0)
+    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,错误码:[%d]!", nResult);
+  else
+    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"保存WHWH数据完成.");
+
+  return nResult;
+}
+
+static void SaveHeader_WHWH()
 {
   if (lpCurrentItem == NULL) return;
 
   CHAR chTmp[MAX_PATH] = { 0 };
 
-  GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_WHVER), chTmp, MAX_PATH);
+  GetWindowTextA(GetDlgItem(hDlgFmt, IDC_EDIT_WHVER), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) strcpy_s(lpCurrentItem->hdrHuaWei.chItemVersion, chTmp);
 
-  GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_WHTIME), chTmp, MAX_PATH);
+  GetWindowTextA(GetDlgItem(hDlgFmt, IDC_EDIT_WHTIME), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) lpCurrentItem->hdrHuaWei.u32Time = ScanfHex(chTmp);
 
-  lpCurrentItem->hdrHuaWei.u32Type = (HW_ItemType)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE));
+  lpCurrentItem->hdrHuaWei.u32Type = (HW_ItemType)ComboBox_GetCurSel(GetDlgItem(hDlgFmt, IDC_CB_WHTYPE));
 }
 
-static void SaveHeader_UIMG(HWND hDlg)
+static void SaveHeader_UIMG()
 {
   if (lpCurrentItem == NULL) return;
   if (lpCurrentItem->bIsImage == FALSE) return;
 
+  uint32_t crc32;
   CHAR chTmp[MAX_PATH] = { 0 };
 
-  GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBTIME), chTmp, MAX_PATH);
+  GetWindowTextA(GetDlgItem(hDlgFmt, IDC_EDIT_UBTIME), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) lpCurrentItem->hdrImage.ih_time = EndianSwap32(ScanfHex(chTmp));
 
-  GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBLOAD), chTmp, MAX_PATH);
+  GetWindowTextA(GetDlgItem(hDlgFmt, IDC_EDIT_UBLOAD), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) lpCurrentItem->hdrImage.ih_load = EndianSwap32(ScanfHex(chTmp));
 
-  GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBEP), chTmp, MAX_PATH);
+  GetWindowTextA(GetDlgItem(hDlgFmt, IDC_EDIT_UBEP), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) lpCurrentItem->hdrImage.ih_ep = EndianSwap32(ScanfHex(chTmp));
 
-  GetWindowTextA(GetDlgItem(hDlg, IDC_EDIT_UBNAME), chTmp, MAX_PATH);
+  GetWindowTextA(GetDlgItem(hDlgFmt, IDC_EDIT_UBNAME), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) strcpy_s(lpCurrentItem->hdrImage.ih_name, chTmp);
 
-  lpCurrentItem->hdrImage.ih_os = (IH_OS)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBOS));
-  lpCurrentItem->hdrImage.ih_arch = (IH_ARCH)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBARCH));
-  lpCurrentItem->hdrImage.ih_type = (IH_TYPE)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBIMG));
-  lpCurrentItem->hdrImage.ih_comp = (IH_COMP)ComboBox_GetCurSel(GetDlgItem(hDlg, IDC_CB_UBCOMP));
+  lpCurrentItem->hdrImage.ih_os = (IH_OS)ComboBox_GetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBOS));
+  lpCurrentItem->hdrImage.ih_arch = (IH_ARCH)ComboBox_GetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBARCH));
+  lpCurrentItem->hdrImage.ih_type = (IH_TYPE)ComboBox_GetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBIMG));
+  lpCurrentItem->hdrImage.ih_comp = (IH_COMP)ComboBox_GetCurSel(GetDlgItem(hDlgFmt, IDC_CB_UBCOMP));
+
+  HWNP_CalibrationImageHeaderCrc32(&lpCurrentItem->hdrImage);
+
+  // 修正HW_HDR CRC32
+  crc32 = 0;
+  crc32 = crc32_fast(&lpCurrentItem->hdrImage, sizeof(UIMG_HDR), crc32);
+  crc32 = crc32_fast(lpCurrentItem->lpcImageData, lpCurrentItem->hdrHuaWei.u32RearSize - sizeof(UIMG_HDR), crc32);
+  lpCurrentItem->hdrHuaWei.u32RearCRC = crc32;
+
+  /*
+  crc32 = 0;
+  crc32 = crc32_fast(&lpCurrentItem->hdrImage, sizeof(UIMG_HDR), crc32);
+  crc32 = crc32_fast(lpCurrentItem->lpcImageData, EndianSwap32(lpCurrentItem->hdrImage.ih_size), crc32);
+  lpCurrentItem->hdrHuaWei.u32RearCRC = crc32;
+  */
 }
 
-static void BtnSave_WHWH(HWND hDlg)
+/*
+static void BtnSave_WHWH()
 {
   if (lpCurrentItem == NULL) return;
-  /*
+
+  SaveHeader_WHWH();
+
   if (lpData_WHWH == NULL) return;
 
   DWORD dwSize = sizeof(HW_HDR) + hdrWHWH.u32RearSize;
@@ -444,12 +543,14 @@ static void BtnSave_WHWH(HWND hDlg)
     SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,错误码:[%d]!", nResult);
   else
     SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存WHWH数据完成.");
-  */
 }
 
-static void BtnSave_UIMG(HWND hDlg)
+static void BtnSave_UIMG()
 {
-  /*
+  if (lpCurrentItem == NULL) return;
+
+  SaveHeader_UIMG();
+
   if (bIsImg && lpData_UIMG)
   {
     DWORD dwSize = sizeof(HW_HDR) + sizeof(UIMG_HDR) + BigLittleSwap32(hdrUIMG.ih_size);
@@ -491,37 +592,24 @@ static void BtnSave_UIMG(HWND hDlg)
     else
       SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存UIMG数据完成.");
   }
-  */
 }
+*/
 
 /************************************************************************/
-/* 保存子项目                                                           */
+/* 保存全部                                                             */
 /************************************************************************/
-static int SaveSubItem(int alignMode) {
-  if (lpSubItem == NULL) return -1;
-  if (nSubItem == 0) return -2;
-
-  uint32_t size = 0, offset, index;
-  LPVOID lpMem;
-
-  for (uint32_t i = 0; i < nSubItem; i++) {
-#define CURRENT     (lpSubItem[i])
-    if (CURRENT.bIsInit == FALSE) break;
-
-    size += alignPage(CURRENT.u32TotalSize);
-#undef CURRENT
+static void SaveAll() {
+  if (lpCurrentItem && lpCurrentItem->bIsImage)
+  {
+    SaveHeader_WHWH();
+    SaveHeader_UIMG();
+  }
+  else
+  {
+    SaveHeader_WHWH();
   }
 
-  if (size == 0) return -3;
-
-  lpMem = malloc(size);
-
-  index = 0;
-  offset = 0;
-
-  while (index < nSubItem && offset < size) {
-
-  }
+  SaveSubItem(1);
 }
 
 /************************************************************************/
@@ -569,6 +657,7 @@ static uint32_t InitSubItemList() {
     CURRENT.hdrHuaWei = *lpHwHdr;
     CURRENT.bIsImage = FALSE;
     CURRENT.u32Offset = offset;
+    CURRENT.u32TotalSize = sizeof(HW_HDR) + lpHwHdr->u32RearSize;
 
     lpImgHdr = NULL;
 
@@ -602,23 +691,6 @@ static uint32_t InitSubItemList() {
   }
 
   return index;
-}
-
-/************************************************************************/
-/* 保存全部                                                             */
-/************************************************************************/
-static void SaveAll() {
-  /*
-  if (lpCurrentItem && lpCurrentItem->bIsImg && lpCurrentItem->lpImageData)
-  {
-    SaveHeader_WHWH(hDlgFmt);
-    BtnSave_UIMG(hDlgFmt);
-  }
-  else
-  {
-    BtnSave_WHWH(hDlgFmt);
-  }
-  */
 }
 
 static uint32_t UpdateSubItemList() {
@@ -888,7 +960,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       case IDC_BTN_WHIMP:   //导入WHWH数据
       {
         if (lpCurrentItem) {
-          SaveHeader_WHWH(hDlgFmt);
+          SaveHeader_WHWH();
           ImportData_WHWH();
         }
       }
@@ -912,18 +984,18 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       case IDC_BTN_UBIMP:   //导入UIMG数据
         if (lpCurrentItem && lpCurrentItem->bIsImage)
         {
-          SaveHeader_WHWH(hDlgFmt);
-          SaveHeader_UIMG(hDlgFmt);
+          SaveHeader_WHWH();
+          SaveHeader_UIMG();
           ImportData_UIMG();
         }
         break;
 
-      case IDC_BTN_WHSAVE:    //保存WHWH 头部 + 数据
-        BtnSave_WHWH(hDlg);
+      case IDC_BTN_WHSAVE:    //保存WHWH 头部
+        SaveHeader_WHWH();
         break;
 
-      case IDC_BTN_UBSAVE:    //保存UIMG 头部 + 数据
-        BtnSave_UIMG(hDlg);
+      case IDC_BTN_UBSAVE:    //保存UIMG 头部
+        SaveHeader_UIMG();
         break;
 
       case IDC_BTN_ADF_SAVE:    //保存WHWH 头部 + UIMG 头部 + 数据

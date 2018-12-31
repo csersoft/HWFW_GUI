@@ -77,6 +77,8 @@ void CleanListView();
 void CleanView();
 void OpenFirmware(LPCWSTR lpPath);
 
+uint32_t MemAlignCpy(LPVOID const dest, size_t const destSize, LPCVOID const src, size_t const srcSize, int fill);
+
 static inline BOOL ScreenToClient(__in HWND hWnd, __inout LPRECT lpRect)
 {
   ScreenToClient(hWnd, (LPPOINT)&(lpRect->left));
