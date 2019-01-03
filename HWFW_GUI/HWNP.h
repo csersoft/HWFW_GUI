@@ -240,18 +240,6 @@ const char * const HW_SubItemType_Text[hwType_Limit] = {
 };
 
 
-/*
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UPGRDCHECK");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"MODULE");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"FLASH_CONFIG");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UBOOT");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"MINISYS");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"KERNEL");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"ROOTFS");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UPDATEFLAG");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"EFS");
-    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UNKNOWN");
-*/
 const WCHAR * const HW_ItemType_Text[] = {
   L"UPGRDCHECK",
   L"MODULE",
