@@ -207,7 +207,7 @@ typedef struct _HWNP_ItemInfo
 } HWNP_ITEMINFO, *PHWNP_ITEMINFO;
 
 
-enum HW_ItemType : uint32_t
+enum HW_SubItemType : uint32_t
 {
   hwType_Invalid = 0U,
   hwType_Kernel = 1U,
@@ -224,7 +224,7 @@ enum HW_ItemType : uint32_t
   hwType_Limit
 };
 
-const char * const HW_ItemType_Text[hwType_Limit] = {
+const char * const HW_SubItemType_Text[hwType_Limit] = {
   "?    Invalid",
   "1    Kernel",
   "2    RootFS",
@@ -239,13 +239,42 @@ const char * const HW_ItemType_Text[hwType_Limit] = {
   "11   SignInfo",
 };
 
+
+/*
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UPGRDCHECK");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"MODULE");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"FLASH_CONFIG");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UBOOT");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"MINISYS");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"KERNEL");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"ROOTFS");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UPDATEFLAG");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"EFS");
+    ComboBox_AddStringW(GetDlgItem(hDlg, IDC_CB_TYPE), L"UNKNOWN");
+*/
+const WCHAR * const HW_ItemType_Text[] = {
+  L"UPGRDCHECK",
+  L"MODULE",
+  L"FLASH_CONFIG",
+  L"UBOOT",
+  L"L2BOOT",
+  L"MINISYS",
+  L"KERNEL",
+  L"ROOTFS",
+  L"UPDATEFLAG",
+  L"EFS",
+  L"SIGNINFO",
+  L"UNKNOWN",
+  NULL
+};
+
 typedef struct _HW_Header
 {
   //魔法字
   uint32_t                  u32Magic;
   char                      chItemVersion[64];
   __time32_t                u32Time;
-  HW_ItemType               u32Type;
+  HW_SubItemType               u32Type;
   uint32_t                  u32RearSize;
   uint32_t                  u32RearCRC;
 } HW_HEADER, HW_HDR, *PHW_HEADER, *PHW_HDR;

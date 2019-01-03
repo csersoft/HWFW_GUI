@@ -6,7 +6,7 @@ HINSTANCE hInst = NULL;                                // 当前实例
 HWND hMainDlg = NULL;
 HMENU hmPop = NULL;
 HMENU hmItemInfo = NULL;
-
+HMENU hmSubItem = NULL;
 
 //
 //   函数: InitInstance(HINSTANCE, int)

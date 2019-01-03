@@ -56,6 +56,13 @@ static void Release()
   nSubItem = 0;
 }
 
+/************************************************************************/
+/*                                                                      */
+/************************************************************************/
+static void DetectAlignMode() {
+
+}
+
 static void EnableUBootGroup(HWND hDlg, BOOL blEnable)
 {
   EnableWindow(GetDlgItem(hDlg, IDC_EDIT_UBHDRCRC), blEnable);
@@ -95,7 +102,7 @@ static void UpdateDataView_WHWH(HWND hDlg)
   swprintf_s(wsTemp, SF_DATE, _tm.tm_year + 1900, _tm.tm_mon + 1, _tm.tm_mday, _tm.tm_hour, _tm.tm_min, _tm.tm_sec);
   SetWindowTextW(GetDlgItem(hDlg, IDC_EDIT_WHTIME_RO), wsTemp);
 
-  if ((lpCurrentItem->hdrHuaWei.u32Type >= HW_ItemType::hwType_Invalid) && (lpCurrentItem->hdrHuaWei.u32Type < HW_ItemType::hwType_Limit))
+  if ((lpCurrentItem->hdrHuaWei.u32Type >= HW_SubItemType::hwType_Invalid) && (lpCurrentItem->hdrHuaWei.u32Type < HW_SubItemType::hwType_Limit))
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), lpCurrentItem->hdrHuaWei.u32Type);
   else
     ComboBox_SetCurSel(GetDlgItem(hDlg, IDC_CB_WHTYPE), 0);
@@ -466,7 +473,7 @@ static void SaveHeader_WHWH()
   GetWindowTextA(GetDlgItem(hDlgFmt, IDC_EDIT_WHTIME), chTmp, MAX_PATH);
   if (strlen(chTmp) != 0) lpCurrentItem->hdrHuaWei.u32Time = ScanfHex(chTmp);
 
-  lpCurrentItem->hdrHuaWei.u32Type = (HW_ItemType)ComboBox_GetCurSel(GetDlgItem(hDlgFmt, IDC_CB_WHTYPE));
+  lpCurrentItem->hdrHuaWei.u32Type = (HW_SubItemType)ComboBox_GetCurSel(GetDlgItem(hDlgFmt, IDC_CB_WHTYPE));
 }
 
 static void SaveHeader_UIMG()
@@ -510,90 +517,6 @@ static void SaveHeader_UIMG()
   */
 }
 
-/*
-static void BtnSave_WHWH()
-{
-  if (lpCurrentItem == NULL) return;
-
-  SaveHeader_WHWH();
-
-  if (lpData_WHWH == NULL) return;
-
-  DWORD dwSize = sizeof(HW_HDR) + hdrWHWH.u32RearSize;
-  LPVOID lpData = malloc(dwSize);
-  int nResult;
-
-  if (lpData == NULL)
-  {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,内存不足!");
-    return;
-  }
-
-  SaveHeader_WHWH(hDlg);
-
-  //hdrWHWH.u32RearCRC = crc32_fast(lpData_WHWH, hdrWHWH.u32RearSize);
-
-  memcpy_s(lpData, dwSize, &hdrWHWH, sizeof(HW_HDR));
-  memcpy_s(MakePointer32(lpData, sizeof(HW_HDR)), dwSize - sizeof(HW_HDR), lpData_WHWH, hdrWHWH.u32RearSize);
-
-  nResult = HWNP_SetItemData(u32ItemIdx, lpData, dwSize);
-  free(lpData);
-
-  if (nResult != 0)
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,错误码:[%d]!", nResult);
-  else
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存WHWH数据完成.");
-}
-
-static void BtnSave_UIMG()
-{
-  if (lpCurrentItem == NULL) return;
-
-  SaveHeader_UIMG();
-
-  if (bIsImg && lpData_UIMG)
-  {
-    DWORD dwSize = sizeof(HW_HDR) + sizeof(UIMG_HDR) + BigLittleSwap32(hdrUIMG.ih_size);
-    LPVOID lpData = malloc(dwSize);
-    int nResult;
-
-    if (lpData == NULL)
-    {
-      SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存UIMG数据失败,内存不足!");
-      return;
-    }
-
-    //SaveHeader_WHWH(hDlg);
-    SaveHeader_UIMG(hDlg);
-
-    //hdrUIMG.ih_dcrc = BigLittleSwap32(crc32_fast(lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size)));
-
-    {
-      UIMG_HDR hdrTmp;
-
-      hdrTmp = hdrUIMG;
-      hdrTmp.ih_hcrc = 0;
-      hdrUIMG.ih_hcrc = BigLittleSwap32(crc32_fast(&hdrTmp, sizeof(UIMG_HDR)));
-    }
-
-    memcpy_s(MakePointer32(lpData, sizeof(HW_HDR)), dwSize - sizeof(HW_HDR), &hdrUIMG, sizeof(UIMG_HDR));
-    memcpy_s(MakePointer32(lpData, sizeof(HW_HDR) + sizeof(UIMG_HDR)), dwSize - (sizeof(HW_HDR) + sizeof(UIMG_HDR)), lpData_UIMG, BigLittleSwap32(hdrUIMG.ih_size));
-
-    hdrWHWH.u32RearSize = sizeof(UIMG_HDR) + BigLittleSwap32(hdrUIMG.ih_size);
-    hdrWHWH.u32RearCRC = crc32_fast(MakePointer32(lpData, sizeof(HW_HDR)), hdrWHWH.u32RearSize);
-
-    memcpy_s(lpData, dwSize, &hdrWHWH, sizeof(HW_HDR));
-
-    nResult = HWNP_SetItemData(u32ItemIdx, lpData, dwSize);
-    free(lpData);
-
-    if (nResult != 0)
-      SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存UIMG数据失败,错误码:[%d]!", nResult);
-    else
-      SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"保存UIMG数据完成.");
-  }
-}
-*/
 
 /************************************************************************/
 /* 保存全部                                                             */
@@ -748,8 +671,8 @@ static void InitView() {
   SNDMSG(GetDlgItem(hDlgFmt, IDC_EDIT_UBEP), EM_SETLIMITTEXT, 10, 0);
   SNDMSG(GetDlgItem(hDlgFmt, IDC_EDIT_UBNAME), EM_SETLIMITTEXT, IH_NMLEN, 0);
 
-  for (int i = 0; i < HW_ItemType::hwType_Limit; i++) {
-    ComboBox_InsertStringA(GetDlgItem(hDlgFmt, IDC_CB_WHTYPE), i, HW_ItemType_Text[i]);
+  for (int i = 0; i < HW_SubItemType::hwType_Limit; i++) {
+    ComboBox_InsertStringA(GetDlgItem(hDlgFmt, IDC_CB_WHTYPE), i, HW_SubItemType_Text[i]);
   }
 
   ComboBox_InsertStringA(GetDlgItem(hDlgFmt, IDC_CB_ALIGN), 0, "None");
