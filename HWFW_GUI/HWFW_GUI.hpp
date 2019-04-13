@@ -121,3 +121,8 @@ static inline uint32_t alignPage(uint32_t val) {
   if (val % 0x1000 == 0) return val;
   return (val / 0x1000 + 1) * 0x1000;
 }
+
+static inline int alignPage(int val) {
+  if (val % 0x1000 == 0) return val;
+  return (val / 0x1000 + 1) * 0x1000;
+}

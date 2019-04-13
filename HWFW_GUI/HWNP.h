@@ -32,7 +32,7 @@
 #define CHK_FLAGS(v, f)                                     (((v) & (f)) == (f))
 #define CHK_NOFLAGS(v, f)                                   (((v) & (f)) != (f))
 #define HWNP_HEADER_MAGIC                                   0x504e5748                                                                      //HWNP
-#define HWNP_WHWH_MAGIC                                     'hwhw'                                                                          //whwh header magic
+#define HWNP_HWHW_MAGIC                                     'hwhw'                                                                          //whwh header magic
 #define CHK_OUT_OF_UBOUND(pointer, start, size)             ((size_t)(pointer) >= ((size_t)(start) + (size_t)(size)))                       //检查上标越界
 #define CHK_OUT_OF_UBOUND2(pointer, len, start, size)       (((size_t)(pointer) + (size_t)(len))  > ((size_t)(start) + (size_t)(size)))     //检查上标越界
 
@@ -262,7 +262,7 @@ typedef struct _HW_Header
   uint32_t                  u32Magic;
   char                      chItemVersion[64];
   __time32_t                u32Time;
-  HW_SubItemType               u32Type;
+  HW_SubItemType            u32Type;
   uint32_t                  u32RearSize;
   uint32_t                  u32RearCRC;
 } HW_HEADER, HW_HDR, *PHW_HEADER, *PHW_HDR;

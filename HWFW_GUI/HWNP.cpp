@@ -292,7 +292,7 @@ int HWNP_GetItemDataTypeByIndex(__in uint32_t u32Index, __out LPDWORD lpDataType
 
   DWORD dwType = 0;
 
-  if ((*(LPDWORD)lpItemCopy[u32Index].lpItemData) == HWNP_WHWH_MAGIC)
+  if ((*(LPDWORD)lpItemCopy[u32Index].lpItemData) == HWNP_HWHW_MAGIC)
   {
     dwType |= IDT_WHWH;
 

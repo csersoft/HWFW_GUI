@@ -86,7 +86,7 @@ static void ListFileHeader(HWND hListView)
   ListView_AddItemW(hListView, ItemIndex(nIndex), 0, wsTemp, LT_NONE, 0, 0, 0);
   swprintf_s(wsTemp, SF_HEX_DEC16, fwHeader.PacketHeader.u16ProductListSize, fwHeader.PacketHeader.u16ProductListSize);
   ListView_AddItemW(hListView, ItemIndex(nIndex), 1, wsTemp, LT_NONE, 0, 0, 0);
-  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"ProductListSize  #  产品支持列表大小  (Little-Endian)", LT_NONE, 0, 0, 0);
+  ListView_AddItemW(hListView, ItemIndexPlus(nIndex), 2, L"ProductListSize  #  产品列表大小  (Little-Endian)", LT_NONE, 0, 0, 0);
 
 
   swprintf_s(wsTemp, SF_HEX, OffsetOf(HWNP_HEADER, PacketHeader.u16ItemInfoSize));
@@ -203,11 +203,11 @@ void ListItemInfo(HWND hListView)
   ListView_SetExtendedListViewStyle(hListView, LVS_EX_DEFAULT);
 
 
-  ListView_AddColumn(hListView, 100, 0, L"项目信息偏移");
-  ListView_AddColumn(hListView, 60, 1, L"项目Id");
-  ListView_AddColumn(hListView, 288, 2, L"项目路径");
-  ListView_AddColumn(hListView, 96, 3, L"项目策略");
-  ListView_AddColumn(hListView, 96, 4, L"项目CRC32");
+  ListView_AddColumn(hListView, 128, 0, L"项目信息偏移");
+  ListView_AddColumn(hListView, 56, 1, L"Id");
+  ListView_AddColumn(hListView, 304, 2, L"项目路径");
+  ListView_AddColumn(hListView, 112, 3, L"项目策略");
+  ListView_AddColumn(hListView, 112, 4, L"项目CRC32");
 #if LV_CFG_SHOW_DATAINFO
   ListView_AddColumn(hListView, 100, 5, L"项目数据偏移");
   ListView_AddColumn(hListView, 200, 6, L"项目数据大小");
@@ -215,9 +215,9 @@ void ListItemInfo(HWND hListView)
   ListView_AddColumn(hListView, 256, 8, L"项目版本");
   ListView_AddColumn(hListView, 90, 9, L"保留数据");
 #else
-  ListView_AddColumn(hListView, 104, 5, L"项目类型");
+  ListView_AddColumn(hListView, 112, 5, L"项目类型");
   ListView_AddColumn(hListView, 256, 6, L"项目版本");
-  ListView_AddColumn(hListView, 90, 7, L"保留数据");
+  ListView_AddColumn(hListView, 112, 7, L"保留数据");
 #endif
 
 
