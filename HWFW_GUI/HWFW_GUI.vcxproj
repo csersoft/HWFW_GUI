@@ -58,7 +58,7 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_LLVM|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" >
+  <PropertyGroup Label="UserMacros">
     <XPDeprecationWarning>false</XPDeprecationWarning>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -81,7 +81,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;Gdi32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
@@ -107,7 +107,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;Gdi32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>
@@ -133,7 +133,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>User32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;Gdi32.lib;ComDlg32.lib;Shell32.lib;Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <HeapReserveSize>67108864</HeapReserveSize>
       <StackReserveSize>2097152</StackReserveSize>
     </Link>

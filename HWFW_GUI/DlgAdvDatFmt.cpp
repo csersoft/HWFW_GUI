@@ -1,6 +1,8 @@
 ﻿#include "stdafx.h"
 #include "HWFW_GUI.hpp"
 
+#define SUBITEM_USE_OFFSET      0
+
 /************************************************************************/
 /*  华为WHWH子项目                                                      */
 /************************************************************************/
@@ -9,8 +11,10 @@ typedef struct _HuaWeiSubItemObject {
   BOOL          bIsInit = FALSE;
   //子项目是否UImage格式
   BOOL          bIsImage = FALSE;
+#if SUBITEM_USE_OFFSET
   //子项目相对于项目数据的偏移
   uint32_t      u32Offset = 0;
+#endif
   //项目总大小 (HW_HDR + UIMG_HDR + UIMG_Data)
   size_t        u32TotalSize = 0;
   //指向华为数据 (xxx || uimage hdr + uimage data)
@@ -56,11 +60,8 @@ static void Release()
   nSubItem = 0;
 }
 
-/************************************************************************/
-/*                                                                      */
-/************************************************************************/
 static void DetectAlignMode() {
-
+  // TODO
 }
 
 static void EnableUBootGroup(HWND hDlg, BOOL blEnable)
@@ -300,7 +301,10 @@ static int ImportData_WHWH() {
 
       SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"导入WHWH数据完成.");
       UpdateDataView();
+      return 1;
     }
+
+    return 0;
   }
   __finally {
     if (lpData) free(lpData);
@@ -375,11 +379,64 @@ static int ImportData_UIMG() {
 
       SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"导入UIMG数据完成.");
       UpdateDataView();
+      return 1;
     }
+
+    return 0;
   }
   __finally {
     if (lpData) free(lpData);
   }
+}
+
+static int MakeSubItem(LPVOID lpData, uint32_t maxSize, PHWSUBITEM_OBJ lpSubItem, BOOL align) {
+  if (lpData == NULL) return -1;
+  if (maxSize == 0) return -2;
+  if (lpSubItem == NULL) return -3;
+  if (lpSubItem->bIsInit == FALSE) return -4;
+  if (maxSize < lpSubItem->u32TotalSize) return -5;
+
+  uint32_t temp, offset;
+  LPVOID lpItem;
+
+  lpItem = NULL;
+
+  __try {
+    lpItem = malloc(lpSubItem->u32TotalSize);
+    assert(lpItem != NULL);
+
+    temp = 0;
+    offset = 0;
+
+    memcpy_s(MakePointer32(lpItem, offset), lpSubItem->u32TotalSize - offset, &(lpSubItem->hdrHuaWei), sizeof(HW_HDR));
+    offset += sizeof(HW_HDR);
+
+    if (lpSubItem->bIsImage) {
+      memcpy_s(MakePointer32(lpItem, offset), lpSubItem->u32TotalSize - offset, &(lpSubItem->hdrImage), sizeof(UIMG_HDR));
+      offset += sizeof(UIMG_HDR);
+
+      temp = EndianSwap32(lpSubItem->hdrImage.ih_size);
+      memcpy_s(MakePointer32(lpItem, offset), lpSubItem->u32TotalSize - offset, lpSubItem->lpcImageData, temp);
+      offset += temp;
+    }
+    else {
+      memcpy_s(MakePointer32(lpItem, offset), lpSubItem->u32TotalSize - offset, lpSubItem->lpcHuaWeiData, lpSubItem->hdrHuaWei.u32RearSize);
+      offset += lpSubItem->hdrHuaWei.u32RearSize;
+    }
+
+    if (align) {
+      temp = MemAlignCpy(lpData, maxSize, lpItem, offset, 0xFF);
+    }
+    else {
+      temp = lpSubItem->u32TotalSize;
+      memcpy_s(lpData, maxSize, lpItem, temp);
+    }
+  }
+  __finally {
+    free(lpItem);
+  }
+
+  return (int)temp;
 }
 
 /************************************************************************/
@@ -390,75 +447,61 @@ static int SaveSubItem(int alignMode) {
   if (lpSubItem == NULL) return -1;
   if (nSubItem == 0) return -2;
 
-  int nResult;
-  uint32_t size = 0, offset, index, tmp, offset2;
-  LPVOID lpMem, lpItem;
+  int result, ret;
+  uint32_t totalSize = 0, offset, index;
+  LPVOID lpMem;
 
   for (uint32_t i = 0; i < nSubItem; i++) {
 #define CURRENT     (lpSubItem[i])
     if (CURRENT.bIsInit == FALSE) break;
 
-    size += alignPage(CURRENT.u32TotalSize);
+    totalSize += alignPage(CURRENT.u32TotalSize);
 #undef CURRENT
   }
 
-  if (size == 0) return -3;
+  if (totalSize == 0) return -3;
 
-  lpMem = malloc(size);
+  lpMem = malloc(totalSize);
 
   index = 0;
   offset = 0;
 
-  while (index < nSubItem && offset < size) {
-#define CURRENT     (lpSubItem[index])
-    if (CURRENT.bIsInit == FALSE) continue;
-
-    lpItem = NULL;
-    tmp = 0;
-
+  while (index < nSubItem && offset < totalSize) {
     __try {
-      lpItem = malloc(CURRENT.u32TotalSize);
-      assert(lpItem != NULL);
+#define CURRENT     (lpSubItem[index])
+      if (CURRENT.bIsInit == FALSE) continue;
 
-      offset2 = 0;
+      ret = MakeSubItem(MakePointer32(lpMem, offset), totalSize - offset, &CURRENT, TRUE);
 
-      memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, &(CURRENT.hdrHuaWei), sizeof(HW_HDR));
-      offset2 += sizeof(HW_HDR);
+      if (ret < 0) {
+        size_t stOut;
+        WCHAR szText[MAX_PATH];
+        WCHAR szTemp[MAX_PATH];
 
-      if (CURRENT.bIsImage) {
-        memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, &(CURRENT.hdrImage), sizeof(UIMG_HDR));
-        offset2 += sizeof(UIMG_HDR);
-
-        tmp = EndianSwap32(CURRENT.hdrImage.ih_size);
-        memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, CURRENT.lpcImageData, tmp);
-        offset2 += tmp;
+        mbstowcs_s(&stOut, szTemp, CURRENT.hdrHuaWei.chItemVersion, sizeof(HW_HDR::chItemVersion));
+        wsprintf(szText, L"构造子项目出错: [%s]:[%d] !", szTemp, ret);
+        MessageBoxW(hDlgFmt, szText, L"警告", MB_OK | MB_ICONWARNING);
       }
       else {
-        memcpy_s(MakePointer32(lpItem, offset2), CURRENT.u32TotalSize - offset2, CURRENT.lpcHuaWeiData, CURRENT.hdrHuaWei.u32RearSize);
-        offset2 += CURRENT.hdrHuaWei.u32RearSize;
+        offset += ret;
       }
-
-      tmp = MemAlignCpy(MakePointer32(lpMem, offset), size - offset, lpItem, offset2, 0xFF);
+#undef CURRENT
     }
     __finally {
-      free(lpItem);
+      index++;
     }
-
-    offset += tmp;
-    index++;
-#undef CURRENT
   }
 
-  nResult = HWNP_SetItemData(u32ItemIdx, lpMem, size);
+  result = HWNP_SetItemData(u32ItemIdx, lpMem, totalSize);
 
   free(lpMem);
 
-  if (nResult != 0)
-    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,错误码:[%d]!", nResult);
+  if (result != 0)
+    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,错误码:[%d]!", result);
   else
     SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"保存WHWH数据完成.");
 
-  return nResult;
+  return result;
 }
 
 static void SaveHeader_WHWH()
@@ -560,7 +603,6 @@ static uint32_t EnumSubItem() {
   return result;
 }
 
-
 static int InitSubItem(PHWSUBITEM_OBJ lpCurrent, LPCVOID lpData) {
   if (lpCurrent == NULL) return -1;
   if (lpData == NULL) return -2;
@@ -619,7 +661,10 @@ static uint32_t InitSubItemList() {
     ret = InitSubItem(&CURRENT, &lpData[offset]);
     if (ret < 0) break;
 
+#if SUBITEM_USE_OFFSET
     CURRENT.u32Offset = offset;
+#endif
+
     offset += alignPage(sizeof(HW_HDR) + CURRENT.hdrHuaWei.u32RearSize);
 
     index++;
@@ -714,9 +759,28 @@ static void InitView() {
 static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
   DWORD dwType;
   int ret;
+  HWNP_ITEMINFO hwItemInfo;
 
   Release();
   InitView();
+
+  ret = HWNP_GetItemInfoByIndex(nIndex, &hwItemInfo);
+
+  if (ret != 0) {
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"获取项目信息失败:[%d].", ret);
+    return TRUE;
+  }
+  else
+  {
+    size_t stOut;
+    WCHAR szText[MAX_PATH];
+    WCHAR szPath[MAX_PATH];
+
+    mbstowcs_s(&stOut, szPath, hwItemInfo.chItemPath, sizeof(HWNP_ITEMINFO::chItemPath));
+    wsprintf(szText, L"高级项目数据格式编辑 => [%s]", szPath);
+
+    SetWindowTextW(hDlg, szText);
+  }
 
   ret = HWNP_GetItemDataSizeByIndex(nIndex, &u32DataSize);
 
@@ -724,7 +788,6 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
     SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"获取项目数据大小失败:[%d].", ret);
     return TRUE;
   }
-
 
   ret = HWNP_GetItemDataPointerByIndex(nIndex, &lpItemData);
 
@@ -954,12 +1017,12 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
         EndDialog(hDlg, IDCANCEL);
         break;
 
-        //添加华为子项目
+      //添加华为子项目
       case IDC_BTN_ADD_HW_ITEM:
       {
         LPVOID lpData = NULL;
         DWORD dwSize = 0;
-        WCHAR szFile[MAX_PATH] = {0};
+        WCHAR szFile[MAX_PATH] = { 0 };
 
         if (GetOpenFilePath(hDlg, szFile, MAX_PATH))
         {
@@ -967,46 +1030,124 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           PHWSUBITEM_OBJ lpNewSubItem;
           int ret;
 
+
+          if (!ImportFromFile(szFile, &lpData, &dwSize)) {
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导入文件数据失败!");
+            if (lpData != NULL) free(lpData);
+            break;
+          }
+
+          if (dwSize <= sizeof(HW_HEADER)) {
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"文件大小不合法!");
+            if (lpData != NULL) free(lpData);
+            break;
+          }
+
+          lpHwHdr = (PHW_HEADER)lpData;
+
+          if (lpHwHdr->u32Magic != HWNP_HWHW_MAGIC) {
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"文件头魔法字不正确!");
+            if (lpData != NULL) free(lpData);
+            break;
+          }
+
+          lpNewSubItem = (PHWSUBITEM_OBJ)_recalloc(lpSubItem, nSubItem + 1, sizeof(HWSUBITEM_OBJ));
+
+          if (lpNewSubItem == NULL) {
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"重新分配内存失败!");
+            if (lpData != NULL) free(lpData);
+            break;
+          }
+
+          ret = InitSubItem(&lpNewSubItem[nSubItem], lpData);
+
+          if (ret < 0) {
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"解析对象失败: [%d]!", ret);
+            if (lpData != NULL) free(lpData);
+            break;
+          }
+
+          lpNewSubItem[nSubItem].lpRawData = lpData;
+
+          nSubItem++;
+          lpSubItem = lpNewSubItem;
+          lpCurrentItem = &lpSubItem[0];
+
+          UpdateSubItemList();
+          TreeView_DlgSelectItem(hDlgFmt, IDC_TV_SUBITEM, lpCurrentItem->hItem);
+        }
+      }
+      break;
+
+      //导出选中子项目
+      case IDC_BTN_EXP_HW_ITEM:
+      {
+        //size_t stOut;
+        int ret;
+        WCHAR szFile[MAX_PATH] = { 0 };
+        //WCHAR szTemp[MAX_PATH];
+
+        if (lpCurrentItem == NULL || lpCurrentItem->bIsInit == FALSE) break;
+
+        //mbstowcs_s(&stOut, szTemp, lpCurrentItem->hdrHuaWei.chItemVersion, sizeof(HW_HDR::chItemVersion));
+
+        wsprintf(szFile, L"sub.bin");
+
+        if (GetSaveFilePath(hDlg, szFile, MAX_PATH)) {
+          LPVOID lpData = malloc(lpCurrentItem->u32TotalSize);
+
           __try {
-            if (!ImportFromFile(szFile, &lpData, &dwSize)) {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导入文件数据失败!");
-              break;
-            }
-
-            if (dwSize <= sizeof(HW_HEADER)) {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"文件大小不合法!");
-              break;
-            }
-
-            lpHwHdr = (PHW_HEADER)lpData;
-
-            if (lpHwHdr->u32Magic != HWNP_HWHW_MAGIC) {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"文件头魔法字不正确!");
-              break;
-            }
-
-            lpNewSubItem = (PHWSUBITEM_OBJ)_recalloc(lpSubItem, nSubItem + 1, sizeof(HWSUBITEM_OBJ));
-
-            if (lpNewSubItem == NULL) {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"重新分配内存失败!");
-              break;
-            }
-
-            ret = InitSubItem(&lpNewSubItem[nSubItem], lpData);
+            ret = MakeSubItem(lpData, lpCurrentItem->u32TotalSize, lpCurrentItem, FALSE);
 
             if (ret < 0) {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"解析对象失败: [%d]!", ret);
-              break;
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"构造子对象失败: [%d]!", ret);
             }
-
-            nSubItem++;
-
-            UpdateSubItemList();
+            else {
+              if (ExportToFile(szFile, lpData, ret)) {
+                SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出子项目成功: [%s]", szFile);
+              }
+              else {
+                SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出子项目失败 !!!");
+              }
+            }
           }
           __finally {
-            if (lpData != NULL) free(lpData);
+            if (lpData) free(lpData);
           }
         }
+      }
+      break;
+
+      //删除选中子项目
+      case IDC_BTN_DEL_HW_ITEM:
+      {
+        PHWSUBITEM_OBJ lpNewSubItem;
+
+        if (lpCurrentItem == NULL) break;
+
+        if (nSubItem <= 1) {
+          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"无法继续删除子项目, 一个项目中至少包含一个子项目!");
+          break;
+        }
+
+        lpNewSubItem = (PHWSUBITEM_OBJ)calloc(nSubItem - 1, sizeof(HWSUBITEM_OBJ));
+
+        for (uint32_t i = 0, index = 0; i < nSubItem; i++) {
+          //跳过需要删除的子项目
+          if (&lpSubItem[i] == lpCurrentItem) continue;
+
+          memcpy_s(&lpNewSubItem[index], sizeof(HWSUBITEM_OBJ), &lpSubItem[i], sizeof(HWSUBITEM_OBJ));
+          index++;
+        }
+
+        if (lpCurrentItem->lpRawData) free(lpCurrentItem->lpRawData);
+        free(lpSubItem);
+
+        nSubItem = nSubItem - 1;
+        lpSubItem = lpNewSubItem;
+        lpCurrentItem = &lpSubItem[0];
+        UpdateSubItemList();
+        TreeView_DlgSelectItem(hDlgFmt, IDC_TV_SUBITEM, lpCurrentItem->hItem);
       }
       break;
       }

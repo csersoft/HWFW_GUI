@@ -38,7 +38,7 @@
 #define APP_NAME                L"HWFW_GUI"
 #define APP_VER1                L"1.0.8"
 #define APP_VER2                L"Alpha"
-#define APP_BUILD_VER           L"001"
+#define APP_BUILD_VER           L"002"
 
 
 #if defined _M_IX86
