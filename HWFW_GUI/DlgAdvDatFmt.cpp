@@ -692,7 +692,6 @@ static uint32_t UpdateSubItemList() {
     tvis.item.pszText = CURRENT.hdrHuaWei.chItemVersion;
     tvis.item.lParam = (LPARAM)index;
     CURRENT.hItem = TreeView_DlgInsertItemA(hDlgFmt, IDC_TV_SUBITEM, &tvis);
-
 #undef CURRENT
   }
 
@@ -710,10 +709,10 @@ static int ParseSubItem() {
 
   nSubItem = size;
   lpSubItem = (PHWSUBITEM_OBJ)calloc(size, sizeof(HWSUBITEM_OBJ));
-  lpCurrentItem = &lpSubItem[0];
 
   InitSubItemList();
   UpdateSubItemList();
+  lpCurrentItem = &lpSubItem[0];
   TreeView_DlgSelectItem(hDlgFmt, IDC_TV_SUBITEM, lpCurrentItem->hItem);
 
   return 0;
@@ -1071,9 +1070,8 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
           nSubItem++;
           lpSubItem = lpNewSubItem;
-          lpCurrentItem = &lpSubItem[0];
-
           UpdateSubItemList();
+          lpCurrentItem = &lpSubItem[0];
           TreeView_DlgSelectItem(hDlgFmt, IDC_TV_SUBITEM, lpCurrentItem->hItem);
         }
       }
@@ -1145,8 +1143,8 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
         nSubItem = nSubItem - 1;
         lpSubItem = lpNewSubItem;
-        lpCurrentItem = &lpSubItem[0];
         UpdateSubItemList();
+        lpCurrentItem = &lpSubItem[0];
         TreeView_DlgSelectItem(hDlgFmt, IDC_TV_SUBITEM, lpCurrentItem->hItem);
       }
       break;
