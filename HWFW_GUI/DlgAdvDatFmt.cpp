@@ -32,13 +32,13 @@ typedef struct _HuaWeiSubItemObject {
 } HWSUBITEM_OBJ, *PHWSUBITEM_OBJ;
 
 
-static LPCVOID lpItemData = NULL;
-static uint32_t u32DataSize = 0;
-static uint32_t u32ItemIdx;
-static HWND hDlgFmt = NULL;
-static PHWSUBITEM_OBJ lpSubItem = NULL;
-static PHWSUBITEM_OBJ lpCurrentItem = NULL;
-static uint32_t nSubItem = 0;
+static LPCVOID          lpItemData = NULL;
+static uint32_t         u32DataSize = 0;
+static uint32_t         u32ItemIdx;
+static HWND             hDlgFmt = NULL;
+static PHWSUBITEM_OBJ   lpSubItem = NULL;
+static PHWSUBITEM_OBJ   lpCurrentItem = NULL;
+static uint32_t         nSubItem = 0;
 
 static void Release()
 {
@@ -205,14 +205,6 @@ static BOOL UpdateDataView()
   if (lpCurrentItem->bIsImage) UpdateDataView_UIMG(hDlgFmt);
 
   return TRUE;
-}
-
-static void UpdateCurrent() {
-  if (lpCurrentItem == NULL) return;
-
-  if (lpCurrentItem->bIsInit && lpCurrentItem->lpRawData) {
-
-  }
 }
 
 static int ImportData_WHWH() {
@@ -389,7 +381,7 @@ static int ImportData_UIMG() {
   }
 }
 
-static int MakeSubItem(LPVOID lpData, uint32_t maxSize, PHWSUBITEM_OBJ lpSubItem, BOOL align) {
+static int MakeSubItem(LPVOID lpData, uint32_t maxSize, PHWSUBITEM_OBJ lpSubItem, BOOL align, BOOL notImage = FALSE) {
   if (lpData == NULL) return -1;
   if (maxSize == 0) return -2;
   if (lpSubItem == NULL) return -3;
@@ -411,7 +403,7 @@ static int MakeSubItem(LPVOID lpData, uint32_t maxSize, PHWSUBITEM_OBJ lpSubItem
     memcpy_s(MakePointer32(lpItem, offset), lpSubItem->u32TotalSize - offset, &(lpSubItem->hdrHuaWei), sizeof(HW_HDR));
     offset += sizeof(HW_HDR);
 
-    if (lpSubItem->bIsImage) {
+    if (lpSubItem->bIsImage && notImage == FALSE) {
       memcpy_s(MakePointer32(lpItem, offset), lpSubItem->u32TotalSize - offset, &(lpSubItem->hdrImage), sizeof(UIMG_HDR));
       offset += sizeof(UIMG_HDR);
 
@@ -1080,9 +1072,9 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       //导出选中子项目
       case IDC_BTN_EXP_HW_ITEM:
       {
-        //size_t stOut;
         int ret;
         WCHAR szFile[MAX_PATH] = { 0 };
+        //size_t stOut;
         //WCHAR szTemp[MAX_PATH];
 
         if (lpCurrentItem == NULL || lpCurrentItem->bIsInit == FALSE) break;
@@ -1095,7 +1087,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           LPVOID lpData = malloc(lpCurrentItem->u32TotalSize);
 
           __try {
-            ret = MakeSubItem(lpData, lpCurrentItem->u32TotalSize, lpCurrentItem, FALSE);
+            ret = MakeSubItem(lpData, lpCurrentItem->u32TotalSize, lpCurrentItem, FALSE, TRUE);
 
             if (ret < 0) {
               SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"构造子对象失败: [%d]!", ret);
