@@ -2,7 +2,7 @@
 #include "HWNP.h"
 
 
-//内部项目副本
+// internal item copy
 typedef struct _Internal_ItemCopy
 {
   LPVOID                  lpItemData;
@@ -59,13 +59,13 @@ static inline void HWNP_UpdateHeader()
   hwHeader.PacketHeader.u32ItemCount = u32ItemCount;
   hwHeader.PacketHeader.u16ItemInfoSize = sizeof(HWNP_ITEMINFO);
   
-  //计算头部大小
+  //Calculate head size
   if (nHeaderSizeType == 1)
     hwHeader.FileHeader2.u32HeaderSize = hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO);
   else
     hwHeader.FileHeader2.u32HeaderSize = sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO);
   
-  //计算头部CRC
+  //Calculate header CRC
   u32CRC = crc32_fast(&hwHeader.PacketHeader, sizeof(HWNP_PAKHDR));
   u32CRC = crc32_fast(lpProductList, hwHeader.PacketHeader.u16ProductListSize, u32CRC);
 
@@ -74,11 +74,11 @@ static inline void HWNP_UpdateHeader()
 
   hwHeader.FileHeader2.u32HeaderCRC32 = u32CRC;
 
-  //计算文件大小
+  //Calculate file size
   u32Tmp = (sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO) + u32DataSize) - 76;
   hwHeader.BasicFileHeader.beu32FileSize = EndianSwap32(u32Tmp);
 
-  //计算文件CRC
+  //Calculate file CRC
   u32CRC = crc32_fast(&hwHeader.FileHeader2, sizeof(HWNP_FILEHDR2));
   u32CRC = crc32_fast(&hwHeader.PacketHeader, sizeof(HWNP_PAKHDR), u32CRC);
   u32CRC = crc32_fast(lpProductList, hwHeader.PacketHeader.u16ProductListSize, u32CRC);
@@ -172,7 +172,7 @@ int HWNP_OpenFirmware(__in LPCWSTR lpFilePath)
   nState = 1;
 
   dwFileSize = GetFileSize(hFile, &dwTmp);
-  //不处理大于 1GB 的文件
+  //Do not process files larger than 1GB
   if (dwTmp != 0 || dwFileSize > 0x40000000U) return (nLastError = -2);
   if (dwFileSize < sizeof(HWNP_HEADER)) return (nLastError = -3);
 
@@ -186,18 +186,18 @@ int HWNP_OpenFirmware(__in LPCWSTR lpFilePath)
 
   nState = 2;
 
-  //获取文件头
+  //get file header
   memcpy_s(&hwHeader, sizeof(HWNP_HEADER), lpFile, sizeof(HWNP_HEADER));
   if (hwHeader.BasicFileHeader.u32Magic != HWNP_HEADER_MAGIC) return (nLastError = -6);
 
-  //获取产品支持列表
+  //Get Product Support List
   if (CHK_OUT_OF_UBOUND2(lpFile + sizeof(HWNP_HEADER), hwHeader.PacketHeader.u16ProductListSize, lpFile, dwFileSize)) return (nLastError = -7);
   lpProductList = (LPCH)malloc(hwHeader.PacketHeader.u16ProductListSize);
   if (lpProductList == NULL) return (nLastError = -8);
 
   memcpy_s(lpProductList, hwHeader.PacketHeader.u16ProductListSize, lpFile + sizeof(HWNP_HEADER), hwHeader.PacketHeader.u16ProductListSize);
 
-  //获取项目
+  //get item
   lpItemInfo = (PHWNP_ITEMINFO)(lpFile + sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize);
   u32ItemCount = hwHeader.PacketHeader.u32ItemCount;
   lpItemCopy = (PINT_ITEMCOPY)calloc(u32ItemCount, sizeof(INT_ITEMCOPY));
@@ -371,13 +371,13 @@ int HWNP_SetItemData(__in uint32_t u32Index, __in LPCVOID lpNewData, __in uint32
 
   if (lpData == NULL) return (nLastError = -1004);
 
-  //释放旧数据
+  // release old data
   if (lpItemCopy[u32Index].lpItemData) free(lpItemCopy[u32Index].lpItemData);
 
-  //复制新数据
+  // copy new data
   memcpy_s(lpData, u32DataSize, lpNewData, u32DataSize);
 
-  //设置项目信息
+  //set project information
   lpItemCopy[u32Index].lpItemData = lpData;
   lpItemCopy[u32Index].u32DataSize = u32DataSize;
   lpItemCopy[u32Index].ItemInfo.u32Size = u32DataSize;
@@ -474,14 +474,14 @@ uint32_t HWNP_CheckCRC32()
   if (nState != -1) return CHKCRC_FAILED;
   uint32_t u32CRC;
 
-  //检查项目CRC
+  //Check item CRC
   for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
   {
     if (lpItemCopy[u32Index].ItemInfo.u32ItemCRC32 != crc32_fast(lpItemCopy[u32Index].lpItemData, lpItemCopy[u32Index].u32DataSize))
       return CHKCRC_ITEMCRCERR + u32Index;
   }
 
-  //检查头部CRC
+  //Check header CRC
   u32CRC = crc32_fast(&hwHeader.PacketHeader, sizeof(HWNP_PAKHDR));
   u32CRC = crc32_fast(lpProductList, hwHeader.PacketHeader.u16ProductListSize, u32CRC);
 
@@ -490,7 +490,7 @@ uint32_t HWNP_CheckCRC32()
 
   if (hwHeader.FileHeader2.u32HeaderCRC32 != u32CRC) return CHKCRC_HEADERCRCERR;
 
-  //检查文件CRC
+  //Check the file CRC
   u32CRC = crc32_fast(&hwHeader.FileHeader2, sizeof(HWNP_FILEHDR2));
   u32CRC = crc32_fast(&hwHeader.PacketHeader, sizeof(HWNP_PAKHDR), u32CRC);
   u32CRC = crc32_fast(lpProductList, hwHeader.PacketHeader.u16ProductListSize, u32CRC);
@@ -510,7 +510,7 @@ void HWNP_SortItems(__in BOOL blUpdate)
 {
   if (nState != -1) return;
 
-  //将EFS项目置后
+  //Post the EFS project
   for (uint32_t u32Index = 0; u32Index < u32ItemCount - 1; u32Index++)
   {
     if (strcmp(lpItemCopy[u32Index].ItemInfo.chItemType, "EFS") == 0)
@@ -520,7 +520,7 @@ void HWNP_SortItems(__in BOOL blUpdate)
     }
   }
 
-  //重新指定Id
+  //reassign Id
   for (uint32_t u32Index = 0; u32Index < u32ItemCount - 1; u32Index++)
   {
     lpItemCopy[u32Index].ItemInfo.u32Id = u32Index;
@@ -566,7 +566,7 @@ int HWNP_AddItem(__in uint32_t u32Id, __in LPCVOID lpNewData, __in uint32_t u32D
   lpItemCopy = lpNewItemCopy;
   u32ItemCount++;
 
-  //将EFS项目置后
+  //Post the EFS project
   for (uint32_t u32Index = 0; u32Index < u32ItemCount - 1; u32Index++)
   {
     if (strcmp(lpItemCopy[u32Index].ItemInfo.chItemType, "EFS") == 0)
@@ -621,18 +621,18 @@ int HWNP_Save()
 
   HWNP_Update();
 
-  //计算数据大小
+  // Calculate data size
   for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
     u32DataSize += lpItemCopy[u32Index].u32DataSize;
 
-  //计算文件大小
+  //calculate file size
   u32FileSize = sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO) + u32DataSize;
 
-  //重设文件大小
+  // reset the file size
   SetFilePointer(hFile, u32FileSize, NULL, FILE_BEGIN);
   SetEndOfFile(hFile);
 
-  //写入头部
+  //write header
   SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
   WriteFile(hFile, &hwHeader, sizeof(HWNP_HEADER), &dwTmp, NULL);
   dwOffset += sizeof(HWNP_HEADER);
@@ -641,7 +641,7 @@ int HWNP_Save()
   WriteFile(hFile, lpProductList, hwHeader.PacketHeader.u16ProductListSize, &dwTmp, NULL);
   dwOffset += hwHeader.PacketHeader.u16ProductListSize;
 
-  //写入项目信息
+  //Write project information
   for (uint32_t u32Index = 0; u32Index < u32ItemCount ; u32Index++)
   {
     SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
@@ -649,7 +649,7 @@ int HWNP_Save()
     dwOffset += sizeof(HWNP_ITEMINFO);
   }
 
-  //写入项目数据
+  //write item data
   for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
   {
     SetFilePointer(hFile, dwOffset, NULL, FILE_BEGIN);
@@ -673,18 +673,18 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
 
   HWNP_Update();
 
-  //计算数据大小
+  // Calculate data size
   for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
     u32DataSize += lpItemCopy[u32Index].u32DataSize;
 
-  //计算文件大小
+  //calculate file size
   u32FileSize = sizeof(HWNP_HEADER) + hwHeader.PacketHeader.u16ProductListSize + u32ItemCount * sizeof(HWNP_ITEMINFO) + u32DataSize;
 
-  //重设文件大小
+  // reset the file size
   SetFilePointer(hNewFile, u32FileSize, NULL, FILE_BEGIN);
   SetEndOfFile(hNewFile);
 
-  //写入头部
+  //write header
   SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
   WriteFile(hNewFile, &hwHeader, sizeof(HWNP_HEADER), &dwTmp, NULL);
   dwOffset += sizeof(HWNP_HEADER);
@@ -693,7 +693,7 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
   WriteFile(hNewFile, lpProductList, hwHeader.PacketHeader.u16ProductListSize, &dwTmp, NULL);
   dwOffset += hwHeader.PacketHeader.u16ProductListSize;
 
-  //写入项目信息
+  //Write project information
   for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
   {
     SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
@@ -701,7 +701,7 @@ int HWNP_SaveAs(__in LPCWSTR lpFilePath)
     dwOffset += sizeof(HWNP_ITEMINFO);
   }
 
-  //写入项目数据
+  //write item data
   for (uint32_t u32Index = 0; u32Index < u32ItemCount; u32Index++)
   {
     SetFilePointer(hNewFile, dwOffset, NULL, FILE_BEGIN);
