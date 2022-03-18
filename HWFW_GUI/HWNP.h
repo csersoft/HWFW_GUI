@@ -23,7 +23,7 @@
 #include "uboot_image.h"
 
 /*
-参考:
+refer to:
   http://blog.leexiaolan.tk/pwn-huawei-hg8120c-ont-via-maintenance-tool-part-2
   http://blog.leexiaolan.tk/pwn-huawei-hg8120c-ont-upgrade-pack-format-part-3
   https://github.com/LeeXiaolan/hwfw-tool
@@ -33,8 +33,8 @@
 #define CHK_NOFLAGS(v, f)                                   (((v) & (f)) != (f))
 #define HWNP_HEADER_MAGIC                                   0x504e5748                                                                      //HWNP
 #define HWNP_HWHW_MAGIC                                     'hwhw'                                                                          //whwh header magic
-#define CHK_OUT_OF_UBOUND(pointer, start, size)             ((size_t)(pointer) >= ((size_t)(start) + (size_t)(size)))                       //检查上标越界
-#define CHK_OUT_OF_UBOUND2(pointer, len, start, size)       (((size_t)(pointer) + (size_t)(len))  > ((size_t)(start) + (size_t)(size)))     //检查上标越界
+#define CHK_OUT_OF_UBOUND(pointer, start, size)             ((size_t)(pointer) >= ((size_t)(start) + (size_t)(size)))                       //Check for superscript out of bounds
+#define CHK_OUT_OF_UBOUND2(pointer, len, start, size)       (((size_t)(pointer) + (size_t)(len))  > ((size_t)(start) + (size_t)(size)))     //Check for superscript out of bounds
 
 #define EndianSwap32(int32)                                 ((((uint32_t)(int32) & 0xff000000U) >> 24) | \
                                                             (((uint32_t)(int32) & 0x00ff0000U) >> 8) | \
@@ -70,114 +70,114 @@
 
 
 /*
-HuaWei 固件结构
+HuaWei Firmware structure
 
  ___________________________________
 |                                   |
-|            Header (文件头)        |
+|            Header (file header)        |
 |___________________________________|
 |                                   |
-|    ProductList (支持的产品列表)   |
+|    ProductList (List of supported products)   |
 |___________________________________|
 |                                   |
-|        ItemInfo (项目信息)  * N   |
-|===================================|  <---通常是连续的，但是理论上可以不连续
+|        ItemInfo (Project information)  * N   |
+|===================================|  <---usually continuous，But theoretically it can be discontinuous
 |                                   |
-|            项目 RAW数据           |
+|            project RAW data           |
 |___________________________________|
 
 
 
-HW项目数据 (数据不对齐):
+HW item data (data not aligned)
  ______________________________________________
 |                                              |
-|               HW 项目头 (whwh)               |
+|               HW project header (whwh)               |
 | ____________________________________________ |
 ||                                            ||
-||  uImage 项目头 (0x27, 0x05, 0x19, 0x56)    ||
+||  uImage project header (0x27, 0x05, 0x19, 0x56)    ||
 ||____________________________________________||
 ||                                            ||
-|| 项目有效载荷 (uboot, kernel, rootfs, ...)  ||
+|| item payload (uboot, kernel, rootfs, ...)  ||
 ||____________________________________________||
  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
  
-HW项目数据 (Padding对齐):
+HW item data (Padding alignment):
  _____________________________________________
 |                                             |
-|               HW 项目头 (whwh)              |
+|               HW Project Header (whwh)              |
 | ___________________________________________ |
 ||                                           ||
-||  uImage 项目头 (0x27, 0x05, 0x19, 0x56)   ||
+||  uImage project header (0x27, 0x05, 0x19, 0x56)   ||
 ||___________________________________________||
 ||                                           ||
-|| 项目有效载荷 (uboot, kernel, rootfs, ...) ||
+|| item payload (uboot, kernel, rootfs, ...) ||
 ||___________________________________________||
 |                                             |
-|               对齐用的填充数据              |
+|               padding data for alignment              |
 |_____________________________________________|
 
 
-HW项目数据 (Margin对齐):
+HW item data (Margin alignment):
  _____________________________________________
 |                                             |
-|               HW 项目头 (whwh)              |
+|               HW project header (whwh)              |
 | ___________________________________________ |
 ||                                           ||
-||  uImage 项目头 (0x27, 0x05, 0x19, 0x56)   ||
+||  uImage project header (0x27, 0x05, 0x19, 0x56)   ||
 ||___________________________________________||
 ||                                           ||
-|| 项目有效载荷 (uboot, kernel, rootfs, ...) ||
+|| item payload (uboot, kernel, rootfs, ...) ||
 ||___________________________________________||
 |¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|
-|               对齐用的填充数据              |
+|               padding data for alignment              |
 |_____________________________________________|
 
 */
 
-//基本文件头
+// base file header
 typedef struct _HWNP_BasicFileHeader
 {
-  //魔法字
-  uint32_t                  u32Magic;
+  //magic word
+  uint32_t u32Magic;
 
-  //文件大小 (计算公式为.bin的文件大小 - 76)  big-endian
-  __be32                    beu32FileSize;
+  //File size (calculated as .bin file size - 76) big-endian
+  __be32 beu32FileSize;
 
-  //从HWNP_FILEHDR2开始到文件结束的CRC32值 (包含项目数据)
-  uint32_t                  u32FileCRC32;
+  //CRC32 value from HWNP_FILEHDR2 to end of file (contains project data)
+  uint32_t u32FileCRC32;
 } HWNP_BASFILEHDR, *PHWNP_BASFILEHDR;
 
-//文件头2
+//file header 2
 typedef struct _HWNP_FileHeader2
 {
-  //头部大小  
-  //计算公式有2种:
-  //1:  sizeof(HWNP_HEADER) + Header.u16ProductListSize + Header.u32ItemCount * Header.u16ItemInfoSize
-  //2:  Header.u16ProductListSize + Header.u32ItemCount * Header.u16ItemInfoSize
-  //前一种多了文件头大小
-  //新版本固件一般是第一种公式,好像V100版本的固件是第二种计算公式
-  //该数值不是计算头部CRC32时的大小
-  uint32_t                  u32HeaderSize;
+  //head size
+  //There are 2 kinds of calculation formulas:
+  //1: sizeof(HWNP_HEADER) + Header.u16ProductListSize + Header.u32ItemCount * Header.u16ItemInfoSize
+  //2: Header.u16ProductListSize + Header.u32ItemCount * Header.u16ItemInfoSize
+  //The former one has more file header size
+  //The new version of the firmware is generally the first formula, as if the V100 version of the firmware is the second formula
+  //This value is not the size when calculating the header CRC32
+  uint32_t u32HeaderSize;
 
-  //从HWNP_PAKHDR开始到N个HWNP_ITEMINFO结束的CRC32值 (不包含项目数据)
-  uint32_t                  u32HeaderCRC32;
+  //CRC32 value from the start of HWNP_PAKHDR to the end of N HWNP_ITEMINFO (excluding item data)
+  uint32_t u32HeaderCRC32;
 } HWNP_FILEHDR2, *PHWNP_FILEHDR2;
 
-//包头
+// header
 typedef struct _HWNP_PacketHeader
 {
-  uint32_t                  u32ItemCount;
-  uint8_t                   u8PackTotal;
-  uint8_t                   u8PackNum;
-  uint16_t                  u16ProductListSize;
+  uint32_t u32ItemCount;
+  uint8_t u8PackTotal;
+  uint8_t u8PackNum;
+  uint16_t u16ProductListSize;
 
   union {
-    uint16_t                u16ItemInfoSize;          //== sizeof(HWNP_ITEMINFO)
-    uint32_t                _u32ItemInfoSize;         //== sizeof(HWNP_ITEMINFO)
+    uint16_t u16ItemInfoSize; //== sizeof(HWNP_ITEMINFO)
+    uint32_t _u32ItemInfoSize; //== sizeof(HWNP_ITEMINFO)
   };
   
-  uint32_t                  u32Reserved;
+  uint32_t u32Reserved;
 } HWNP_PAKHDR, *PHWNP_PAKHDR;
 
 /*
@@ -195,12 +195,12 @@ typedef struct _HWNP_Header
 
 typedef struct _HWNP_ItemInfo
 {
-  uint32_t                  u32Id;                //原  Index
+  uint32_t                  u32Id;                //Original  Index
   uint32_t                  u32ItemCRC32;          
   uint32_t                  u32Offset;
-  uint32_t                  u32Size;              //原  Len
-  char                      chItemPath[256];      //原  Destination
-  char                      chItemType[16];       //原  Name
+  uint32_t                  u32Size;              //Original  Len
+  char                      chItemPath[256];      //Original  Destination
+  char                      chItemType[16];       //Original  Name
   char                      chItemVersion[64];
   uint32_t                  u32Policy;
   uint32_t                  u32Reserved;
@@ -258,7 +258,7 @@ const WCHAR * const HW_ItemType_Text[] = {
 
 typedef struct _HW_Header
 {
-  //魔法字
+  //magic word
   uint32_t                  u32Magic;
   char                      chItemVersion[64];
   __time32_t                u32Time;
@@ -267,89 +267,89 @@ typedef struct _HW_Header
   uint32_t                  u32RearCRC;
 } HW_HEADER, HW_HDR, *PHW_HEADER, *PHW_HDR;
 
-//内存文件是否已更改
-BOOL          HWNP_IsChanged();
+// Whether the memory file has been changed
+BOOL HWNP_IsChanged();
 
-//获取最后的错误码
-int           HWNP_GetLastError();
+//get the last error code
+int HWNP_GetLastError();
 
-//获取状态值: -1为已正确打开固件文件
-int           HWNP_GetState();
+//Get the status value: -1 means the firmware file has been opened correctly
+int HWNP_GetState();
 
-//获取头部大小的计算方式
-int           HWNP_GetHeaderSizeType();
+//Get the calculation method of the head size
+int HWNP_GetHeaderSizeType();
 
-//设置头部大小的计算方式
-int           HWNP_SetHeaderSizeType(__in int nNewType);
+//Set the calculation method of the header size
+int HWNP_SetHeaderSizeType(__in int nNewType);
 
-//更新信息 (CRC, 项目偏移, 项目大小 等)
-void          HWNP_Update();
+//Update information (CRC, item offset, item size, etc.)
+void HWNP_Update();
 
-//释放一切资源
-void          HWNP_Release();
+// release all resources
+void HWNP_Release();
 
-//打开固件文件
-int           HWNP_OpenFirmware(__in LPCWSTR lpFilePath);
+//Open the firmware file
+int HWNP_OpenFirmware(__in LPCWSTR lpFilePath);
 
-//获取项目数量
-int           HWNP_GetItemCount(__out uint32_t *lpu32Count);
+//get the number of items
+int HWNP_GetItemCount(__out uint32_t *lpu32Count);
 
-//获取项目索引通过项目Id
-int           HWNP_GetItemIndexById(__in uint32_t u32Id, __out uint32_t *lpu32Index);
+//Get the item index by item Id
+int HWNP_GetItemIndexById(__in uint32_t u32Id, __out uint32_t *lpu32Index);
 
-//获取项目信息
-int           HWNP_GetItemInfoByIndex(__in uint32_t u32Index, __out PHWNP_ITEMINFO lpItemInfo);
+//Get project information
+int HWNP_GetItemInfoByIndex(__in uint32_t u32Index, __out PHWNP_ITEMINFO lpItemInfo);
 
-//获取项目数据大小
-int           HWNP_GetItemDataSizeByIndex(__in uint32_t u32Index, __out uint32_t *lpu32DataSize);
+//Get the item data size
+int HWNP_GetItemDataSizeByIndex(__in uint32_t u32Index, __out uint32_t *lpu32DataSize);
 
-//获取项目数据 (仅用于访问, 勿写入)
-int           HWNP_GetItemDataPointerByIndex(__in uint32_t u32Index, __out LPCVOID *lppDataPointer);
+//Get item data (only for access, do not write)
+int HWNP_GetItemDataPointerByIndex(__in uint32_t u32Index, __out LPCVOID *lppDataPointer);
 
-//获取项目数据类型 (whwh / uboot)
-int           HWNP_GetItemDataTypeByIndex(__in uint32_t u32Index, __out LPDWORD lpDataType);
+//Get item data type (whwh / uboot)
+int HWNP_GetItemDataTypeByIndex(__in uint32_t u32Index, __out LPDWORD lpDataType);
 
-//获取固件头部
-int           HWNP_GetFirmwareHeader(__out PHWNP_HEADER lpHeader);
+//Get the firmware header
+int HWNP_GetFirmwareHeader(__out PHWNP_HEADER lpHeader);
 
-//获取产品支持列表大小
-int           HWNP_GetProductListSize(__out uint16_t *lpu16PLSize);
+// Get product support list size
+int HWNP_GetProductListSize(__out uint16_t *lpu16PLSize);
 
-//获取产品支持列表
-int           HWNP_GetProductList(__inout LPCH lpchProdList, __in uint16_t u16PLSize);
+//Get product support list
+int HWNP_GetProductList(__inout LPCH lpchProdList, __in uint16_t u16PLSize);
 
-//设置产品支持列表
-int           HWNP_SetProductList(__in LPCCH lpchProdList, __in uint16_t u16PLSize);
+//Set product support list
+int HWNP_SetProductList(__in LPCCH lpchProdList, __in uint16_t u16PLSize);
 
-//设置项目数据
-int           HWNP_SetItemData(__in uint32_t u32Index, __in LPCVOID lpNewData, __in uint32_t u32DataSize);
+//set item data
+int HWNP_SetItemData(__in uint32_t u32Index, __in LPCVOID lpNewData, __in uint32_t u32DataSize);
 
-//设置项目信息
-int           HWNP_SetItemInfo(__in uint32_t u32Index, __in uint32_t u32Mask, __in uint32_t u32Id, __in LPCCH lpchPath, __in LPCCH lpchType, __in LPCCH lpchVersion, __in uint32_t u32Policy, __in uint32_t u32Reserved);
+//set project information
+int HWNP_SetItemInfo(__in uint32_t u32Index, __in uint32_t u32Mask, __in uint32_t u32Id, __in LPCCH lpchPath, __in LPCCH lpchType, __in LPCCH lpchVersion, __in uint32_t u32Policy, __in uint32_t u32Reserved);
 
-//获取项目最后的Id (未使用的id)
-uint32_t      HWNP_GetLastItemId();
+//Get the last id of the item (unused id)
+uint32_t HWNP_GetLastItemId();
 
-//检查是否有重复的Id
-BOOL          HWNP_CheckDuplicate();
+// Check if there are duplicate IDs
+BOOL HWNP_CheckDuplicate();
 
-//校验CRC (0: 没有问题, 191:文件CRC不正确, 192: 头部CRC不正确, 200+: 项目CRC不正确)
-uint32_t      HWNP_CheckCRC32();
+//Check CRC (0: No problem, 191: Incorrect file CRC, 192: Incorrect header CRC, 200+: Incorrect item CRC)
+uint32_t HWNP_CheckCRC32();
 
-//按照顺序,重新为项目Id排序
-void          HWNP_SortItems(__in BOOL blUpdate);
+//In order, re-sort the item IDs
+void HWNP_SortItems(__in BOOL blUpdate);
 
-//添加新项目
-int           HWNP_AddItem(__in uint32_t u32Id, __in LPCVOID lpNewData, __in uint32_t u32DataSize, __in LPCCH lpchPath, __in LPCCH lpchType, __in LPCCH lpchVersion, __in uint32_t u32Policy, __in uint32_t u32Reserved);
+//add new item
+int HWNP_AddItem(__in uint32_t u32Id, __in LPCVOID lpNewData, __in uint32_t u32DataSize, __in LPCCH lpchPath, __in LPCCH lpchType, __in LPCCH lpchVersion, __in uint32_t u32Policy, __in uint32_t u32Reserved);
 
-//删除项目
-int           HWNP_DeleteItem(__in uint32_t u32Index);
+// delete item
+int HWNP_DeleteItem(__in uint32_t u32Index);
 
-//保存到文件
-int           HWNP_Save();
+//save to file
+int HWNP_Save();
 
-//保存到其它文件
-int           HWNP_SaveAs(__in LPCWSTR lpFilePath);
+//save to another file
+int HWNP_SaveAs(__in LPCWSTR lpFilePath);
 
-//校准uImage Header CRC32
-int           HWNP_CalibrationImageHeaderCrc32(__inout PUIMG_HDR lpImageHdr);
+//Calibrate uImage Header CRC32
+int HWNP_CalibrationImageHeaderCrc32(__inout PUIMG_HDR lpImageHdr);
