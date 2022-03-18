@@ -3,7 +3,7 @@
 
 CHAR chIniPath[MAX_PATH] = { 0 };
 
-// 主窗口的消息处理程序。
+// The message handler for the main window.
 INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
   static LONG lngTv_w, lngTv_h_diff,
@@ -117,7 +117,7 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
           }
         }
         else
-          SetStatus(L"获取文件路径失败!");
+          SetStatus(L"Failed to get file path!");
       }
       break;
 
@@ -126,12 +126,12 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         int nResult = HWNP_Save();
 
         if (nResult == 0)
-          SetStatus(L"文件保存完成.");
+          SetStatus(L"The file is saved.");
         else
         {
           WCHAR wsTmp[128];
 
-          swprintf_s(wsTmp, L"文件保存失败,错误码:[%d]!", nResult);
+          swprintf_s(wsTmp, L"Failed to save the file, error code: [%d]!", nResult);
           SetStatus(wsTmp);
         }
       }
@@ -146,15 +146,15 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
           int nResult = HWNP_SaveAs(wsTmp);
 
           if (nResult == 0)
-            SetStatus(L"文件保存完成.");
+            SetStatus(L"The file is saved.");
           else
           {
-            swprintf_s(wsTmp, L"文件保存失败,错误码:[%d]!", nResult);
+            swprintf_s(wsTmp, L"Failed to save the file, error code: [%d]!", nResult);
             SetStatus(wsTmp);
           }
         }
         else
-          SetStatus(L"获取文件路径失败!");
+          SetStatus(L"Failed to get file path!");
       }
       break;
 
@@ -172,20 +172,20 @@ INT_PTR CALLBACK DlgProc_Main(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         uint32_t u32Result = HWNP_CheckCRC32();
 
         if (u32Result == CHKCRC_OK)
-          SetStatus(L"CRC32校验通过.");
+          SetStatus(L"CRC32 check passed.");
         else if (u32Result == CHKCRC_HEADERCRCERR)
-          SetStatus(L"头部CRC32校验失败!");
+          SetStatus(L"The header CRC32 check failed!");
         else if (u32Result == CHKCRC_FILECRCERR)
-          SetStatus(L"文件CRC32校验失败!");
+          SetStatus(L"File CRC32 check failed!");
         else if (u32Result >= CHKCRC_ITEMCRCERR)
         {
           WCHAR wsTmp[128];
 
-          swprintf_s(wsTmp, L"项目校验失败,Index:[%u]!", u32Result - CHKCRC_ITEMCRCERR);
+          swprintf_s(wsTmp, L"Item check failed,Index:[%u]!", u32Result - CHKCRC_ITEMCRCERR);
           SetStatus(wsTmp);
         }
         else
-          SetStatus(L"未知的CRC32校验结果!");
+          SetStatus(L"Unknown CRC32 check result!");
       }
       break;
 
