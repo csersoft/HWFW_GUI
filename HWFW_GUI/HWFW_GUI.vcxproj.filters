@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
+    <Filter Include="Source File">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="头文件">
+    <Filter Include="head File">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="资源文件">
+    <Filter Include="resource">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
@@ -31,89 +31,89 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
-      <Filter>头文件</Filter>
+<Filter>Header file</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>头文件</Filter>
+      <Filter>Header file</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>头文件</Filter>
+      <Filter>Header file</Filter>
     </ClInclude>
     <ClInclude Include="HWNP.h">
-      <Filter>头文件</Filter>
+      <Filter>Header file</Filter>
     </ClInclude>
     <ClInclude Include="uboot_image.h">
-      <Filter>头文件</Filter>
+      <Filter>Header file</Filter>
     </ClInclude>
     <ClInclude Include="DlgMain.h">
-      <Filter>头文件</Filter>
+      <Filter>Header file</Filter>
     </ClInclude>
     <ClInclude Include="HWFW_GUI.hpp">
-      <Filter>头文件</Filter>
+      <Filter>Header file</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="HWFW_GUI.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="HWNP.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="ListView_Events.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="TreeView_Events.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="FastCRC32.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="DlgAbout.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="DlgAdvDatFmt.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="DlgItemInfo.cpp">
-      <Filter>源文件</Filter>
+<Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="DlgMain.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="Common.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
     <ClCompile Include="DlgEditProduct.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Source file</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HWFW_GUI.rc">
-      <Filter>资源文件</Filter>
+      <Filter>Resource file</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="HWFW_GUI.ico">
-      <Filter>资源文件</Filter>
+      <Filter>Resource file</Filter>
     </Image>
     <Image Include="alipay.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>Resource file</Filter>
     </Image>
     <Image Include="wechat.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>Resource file</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="HWPDB.ini">
-      <Filter>资源文件</Filter>
+      <Filter>Resource file</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="app.manifest">
-      <Filter>资源文件</Filter>
+      <Filter>Resource file</Filter>
     </Manifest>
   </ItemGroup>
 </Project>
