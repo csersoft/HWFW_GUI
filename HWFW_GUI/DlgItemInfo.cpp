@@ -121,7 +121,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
       if (nResult != 0)
       {
-        swprintf_s(wsTemp, L"获取项目信息失败!错误码:[%d]", nResult);
+        swprintf_s(wsTemp, L"Failed to get project information! Error code: [%d]", nResult);
         SetWindowTextW(GetDlgItem(hDlg, IDC_LBL_II_STATUS), wsTemp);
         return (INT_PTR)TRUE;
       }
@@ -173,21 +173,21 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
             nResult = HWNP_GetItemDataSizeByIndex(lpDlgParam->u32Index, &u32DataSize);
             if (nResult != 0)
             {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"获取项目数据大小失败,错误码:[%d]!", nResult);
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Failed to get item data size, error code: [%d]!", nResult);
               break;
             }
 
             nResult = HWNP_GetItemDataPointerByIndex(lpDlgParam->u32Index, &lpData);
             if (nResult != 0)
             {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"获取项目数据失败,错误码:[%d]!", nResult);
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Failed to get item data, error code: [%d]!", nResult);
               break;
             }
 
             if (ExportToFile(wsTmp, lpData, u32DataSize))
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导出项目数据完成.");
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Export item data completed.");
             else
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导出项目数据失败,错误码:[%d]!", GetLastError());
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Failed to export item data, error code: [%d]!", GetLastError());
           }
         }
         break;
@@ -204,7 +204,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
           {
             if (ImportFromFile(wsTmp, &lpData, &dwDataSize) == FALSE)
             {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"打开文件失败,错误码:[%d]!", GetLastError());
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Failed to open file, error code: [%d]!", GetLastError());
               break;
             }
 
@@ -212,9 +212,9 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
             free(lpData);
 
             if (nResult != 0)
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导入数据失败,错误码:[%d]!", nResult);
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Failed to import data, error code: [%d]!", nResult);
             else
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导入数据完成.");
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Import data completed.");
 
           }
         }
@@ -247,7 +247,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
           if (ImportFromFile(lpDlgParam->lpFile, &lpData, &dwSize) == FALSE)
           {
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"导入文件失败!");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Import file failed!");
             break;
           }
 
@@ -265,7 +265,7 @@ INT_PTR CALLBACK DlgProc_ItemInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM
         }
         else
         {
-          SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"保存项目信息失败,错误码:[%d]!", nResult);
+          SetTooltip(GetDlgItem(hDlg, IDC_LBL_II_STATUS), L"Failed to save project information, error code: [%d]!", nResult);
         }
       }
       break;
