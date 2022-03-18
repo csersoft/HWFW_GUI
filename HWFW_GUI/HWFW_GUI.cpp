@@ -1,26 +1,26 @@
 ﻿#include "stdafx.h"
 #include "HWFW_GUI.hpp"
 
-// 全局变量: 
-HINSTANCE hInst = NULL;                                // 当前实例
+// global variable:
+HINSTANCE hInst = NULL; // current instance
 HWND hMainDlg = NULL;
 HMENU hmPop = NULL;
 HMENU hmItemInfo = NULL;
 HMENU hmSubItem = NULL;
 
 //
-//   函数: InitInstance(HINSTANCE, int)
+// function: InitInstance(HINSTANCE, int)
 //
-//   目的: 保存实例句柄并创建主窗口
+// Purpose: save the instance handle and create the main window
 //
-//   注释: 
+// Comments:
 //
-//        在此函数中，我们在全局变量中保存实例句柄并
-//        创建和显示主程序窗口。
+// In this function, we save the instance handle in a global variable and
+// Create and display the main program window.
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-  hInst = hInstance; // 将实例句柄存储在全局变量中
+  hInst = hInstance; // store the instance handle in a global variable
 
   DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAINDLG), NULL, &DlgProc_Main);
 
@@ -29,8 +29,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
   _In_opt_ HINSTANCE hPrevInstance,
-  _In_ LPWSTR    lpCmdLine,
-  _In_ int       nCmdShow)
+  _In_ LPWSTR lpCmdLine,
+  _In_ int nCmdShow)
 {
   UNREFERENCED_PARAMETER(hPrevInstance);
   UNREFERENCED_PARAMETER(lpCmdLine);
@@ -38,7 +38,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
   _CrtSetDebugFillThreshold(0);
   InitCommonControls();
 
-  // 执行应用程序初始化: 
+  // Perform application initialization:
   if (!InitInstance(hInstance, nCmdShow))
   {
     return FALSE;
@@ -186,15 +186,15 @@ int UpdateView()
   tvis.hInsertAfter = TVI_LAST;
   tvis.item.mask = TVIF_TEXT | TVIF_PARAM;
 
-  tvis.item.pszText = L"<固件文件头部>";
+  tvis.item.pszText = L"<firmware file header>";
   tvis.item.lParam = (LPARAM)TT_FILEHDR;
   htiDefault = htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
-  tvis.item.pszText = L"<产品支持信息>";
+  tvis.item.pszText = L"<product support information>";
   tvis.item.lParam = (LPARAM)TT_MODELINFO;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
-  tvis.item.pszText = L"<包含项目信息>";
+  tvis.item.pszText = L"<includes item information>";
   tvis.item.lParam = (LPARAM)TT_ITEMINFO;
   htiLastItem = TreeView_DlgInsertItemW(hMainDlg, IDC_TV, &tvis);
 
@@ -208,13 +208,13 @@ void OpenFirmware(LPCWSTR lpPath)
 
   if ((nResult = HWNP_OpenFirmware(lpPath)) != 0)
   {
-    SetStatus(L"打开文件失败!错误码:[%d]", nResult);
+    SetStatus(L"Failed to open file! Error code: [%d]", nResult);
     return;
   }
 
   if ((nResult = UpdateView()) != 0)
   {
-    SetStatus(L"更新视图失败!错误码:[%d]", nResult);
+    SetStatus(L"Failed to update view! Error code: [%d]", nResult);
     return ;
   }
 
