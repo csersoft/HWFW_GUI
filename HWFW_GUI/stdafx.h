@@ -1,21 +1,21 @@
-﻿// stdafx.h : 标准系统包含文件的包含文件，
-// 或是经常使用但不常更改的
-// 特定于项目的包含文件
+﻿// stdafx.h : include files for standard system include files，
+// or frequently used but infrequently changed
+// Project-specific include files
 //
 
 #pragma once
 
 #include "targetver.h"
 
-#define WIN32_LEAN_AND_MEAN             // 从 Windows 头中排除极少使用的资料
-// Windows 头文件: 
+#define WIN32_LEAN_AND_MEAN             // from Windows Exclude rarely used data from headers
+// Windows head File: 
 #include <Windows.h>
 #include <WindowsX.h>
 #include <CommDlg.h>
 #include <CommCtrl.h>
 #include <ShellAPI.h>
 
-// C 运行时头文件
+// C runtime header files
 #include <stdint.h>
 #include <stdio.h> 
 #include <stdlib.h>
