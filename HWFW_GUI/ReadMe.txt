@@ -1,45 +1,45 @@
 ﻿========================================================================
-    WIN32 应用程序：HWFW_GUI 项目概述
+    WIN32 application：HWFW_GUI Project Overview
 ========================================================================
 
-应用程序向导已为您创建了此 HWFW_GUI 应用程序。
+The application wizard has created this for you HWFW_GUI application。
 
-本文件概要介绍组成 HWFW_GUI 应用程序的每个文件的内容。
+This file outlines the contents of each of the files that make up the HWFW_GUI application.
 
 
 HWFW_GUI.vcxproj
-    这是使用应用程序向导生成的 VC++ 项目的主项目文件，其中包含生成该文件的 Visual C++ 的版本信息，以及有关使用应用程序向导选择的平台、配置和项目功能的信息。
+    This is the main project file for a VC++ project generated using AppWizard, and contains information about the version of Visual C++ that generated the file, as well as information about the platform, configuration, and project features selected using AppWizard.
 
 HWFW_GUI.vcxproj.filters
-    这是使用“应用程序向导”生成的 VC++ 项目筛选器文件。它包含有关项目文件与筛选器之间的关联信息。在 IDE 中，通过这种关联，在特定节点下以分组形式显示具有相似扩展名的文件。例如，“.cpp”文件与“源文件”筛选器关联。
+    This is the VC++ project filter file generated using the Application Wizard. It contains information about the association between project files and filters. In the IDE, files with similar extensions are displayed in groups under a specific node through this association. For example, ".cpp" files are associated with the "Source Files" filter.
 
 HWFW_GUI.cpp
-    这是主应用程序源文件。
+    This is the main application source file.
 
 /////////////////////////////////////////////////////////////////////////////
-应用程序向导创建了下列资源：
+The AppWizard creates the following resources:
 
 HWFW_GUI.rc
-    这是程序使用的所有 Microsoft Windows 资源的列表。它包括 RES 子目录中存储的图标、位图和光标。此文件可以直接在 Microsoft Visual C++ 中进行编辑。
+    This is a list of all Microsoft Windows resources used by the program. It includes icons, bitmaps, and cursors stored in the RES subdirectory. This file can be edited directly in Microsoft Visual C++.
 
 Resource.h
-    这是标准头文件，可用于定义新的资源 ID。Microsoft Visual C++ 将读取并更新此文件。
+    This is the standard header file that can be used to define new resource IDs. Microsoft Visual C++ will read and update this file.
 
 HWFW_GUI.ico
-    这是用作应用程序图标 (32x32) 的图标文件。此图标包括在主资源文件 HWFW_GUI.rc 中。
+    This is the icon file used as the application icon (32x32). This icon is included in the main resource file HWFW_GUI.rc.
 
 small.ico
-    这是一个图标文件，其中包含应用程序的图标的较小版本 (16x16)。此图标包括在主资源文件 HWFW_GUI.rc 中。
+    This is an icon file that contains a smaller version (16x16) of the application's icon. This icon is included in the main resource file HWFW_GUI.rc.
 
-/////////////////////////////////////////////////////////////////////////////
-其他标准文件:
+///////////////////////////////////////////// //////////////////////////
+Other standard documents:
 
 StdAfx.h, StdAfx.cpp
-    这些文件用于生成名为 HWFW_GUI.pch 的预编译头 (PCH) 文件和名为 StdAfx.obj 的预编译类型文件。
+    These files are used to generate a precompiled header (PCH) file named HWFW_GUI.pch and a precompiled type file named StdAfx.obj.
 
 /////////////////////////////////////////////////////////////////////////////
-其他注释:
+Other notes:
 
-应用程序向导使用“TODO:”注释来指示应添加或自定义的源代码部分。
+The AppWizard uses "TODO:" comments to indicate which sections of source code should be added or customized.
 
 /////////////////////////////////////////////////////////////////////////////
