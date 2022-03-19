@@ -3,32 +3,32 @@
 
 #define SUBITEM_USE_OFFSET      0
 
-/************************************************************************/
-/*  华为WHWH子项目                                                      */
-/************************************************************************/
+/**************************************************** ************************/
+/* Huawei WHWH sub-project */
+/**************************************************** ************************/
 typedef struct _HuaWeiSubItemObject {
-  //子项目是否初始化
-  BOOL          bIsInit = FALSE;
-  //子项目是否UImage格式
-  BOOL          bIsImage = FALSE;
+  // Whether the sub-project is initialized
+  BOOL bIsInit = FALSE;
+  //Whether the sub-item is in UImage format
+  BOOL bIsImage = FALSE;
 #if SUBITEM_USE_OFFSET
-  //子项目相对于项目数据的偏移
-  uint32_t      u32Offset = 0;
+  //The offset of the sub-item relative to the item data
+  uint32_t u32Offset = 0;
 #endif
-  //项目总大小 (HW_HDR + UIMG_HDR + UIMG_Data)
-  size_t        u32TotalSize = 0;
-  //指向华为数据 (xxx || uimage hdr + uimage data)
-  LPCVOID       lpcHuaWeiData = NULL;
-  //指向uimage数据 (uimage data)
-  LPCVOID       lpcImageData = NULL;
-  //完整的数据
-  LPVOID        lpRawData = NULL;
-  //节点句柄
-  HTREEITEM     hItem = NULL;
-  //华为头
-  HW_HDR        hdrHuaWei;
-  //UImage头
-  UIMG_HDR      hdrImage;
+  //Total size of item (HW_HDR + UIMG_HDR + UIMG_Data)
+  size_t u32TotalSize = 0;
+  //point to Huawei data (xxx || uimage hdr + uimage data)
+  LPCVOID lpcHuaWeiData = NULL;
+  //Point to uimage data (uimage data)
+  LPCVOID lpcImageData = NULL;
+  //complete data
+  LPVOID lpRawData = NULL;
+  //Node handle
+  HTREEITEM hItem = NULL;
+  //Huawei head
+  HW_HDR hdrHuaWei;
+  //UImage header
+  UIMG_HDR hdrImage;
 } HWSUBITEM_OBJ, *PHWSUBITEM_OBJ;
 
 
@@ -227,7 +227,7 @@ static int ImportData_WHWH() {
     {
       if (ImportFromFile(wsTmp, &lpData, &dwDataSize) == FALSE)
       {
-        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"打开文件失败,错误码:[%d]!", GetLastError());
+        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"Failed to open file, error code: [%d]!", GetLastError());
         return -1;
       }
 
@@ -236,12 +236,12 @@ static int ImportData_WHWH() {
       if (dwDataSize > sizeof(UIMG_HDR)) {
         lpImgHdr = (PUIMG_HDR)lpData;
 
-        // 判断是否uImage
+        // Determine if uImage is
         if (lpImgHdr->ih_magic == IH_MAGIC_LE) {
           sizeData = EndianSwap32(lpImgHdr->ih_size);
 
           if (dwDataSize < sizeof(UIMG_HDR) + sizeData) {
-            SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"uImage格式数据长度不合法!");
+            SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"The data length in uImage format is invalid!");
             return -2;
           }
 
@@ -257,7 +257,7 @@ static int ImportData_WHWH() {
       lpMem = (LPBYTE)malloc(size);
 
       if (lpMem == NULL) {
-        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"分配内存失败!");
+        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"Failed to allocate memory!");
         return -3;
       }
 
@@ -291,7 +291,7 @@ static int ImportData_WHWH() {
       lpCurrentItem->hdrHuaWei.u32RearCRC = crc32_fast(lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize);
       lpCurrentItem->u32TotalSize = size;
 
-      SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"导入WHWH数据完成.");
+      SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"Import WHWH data completed.");
       UpdateDataView();
       return 1;
     }
@@ -323,7 +323,7 @@ static int ImportData_UIMG() {
     {
       if (ImportFromFile(wsTmp, &lpData, &dwDataSize) == FALSE)
       {
-        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"打开文件失败,错误码:[%d]!", GetLastError());
+        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"Failed to open file, error code: [%d]!", GetLastError());
         return -1;
       }
 
@@ -331,7 +331,7 @@ static int ImportData_UIMG() {
       lpMem = (LPBYTE)malloc(size);
 
       if (lpMem == NULL) {
-        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"分配内存失败!");
+        SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"Allocating memory failed!");
         return -3;
       }
 
@@ -345,17 +345,17 @@ static int ImportData_UIMG() {
 
       index = 0;
 
-      //复制HW_HDR
+      //Copy HW_HDR
       memcpy_s(&lpMem[index], size - index, &lpCurrentItem->hdrHuaWei, sizeof(HW_HDR));
       index += sizeof(HW_HDR);
       lpHuaWei = &lpMem[index];
 
-      //复制UIMG_HDR
+      //Copy UIMG_HDR
       memcpy_s(&lpMem[index], size - index, &hdrImage, sizeof(UIMG_HDR));
       index += sizeof(UIMG_HDR);
       lpImage = &lpMem[index];
 
-      //复制uImage Data
+      //Recovery uImage Data
       memcpy_s(&lpMem[index], size - index, lpData, dwDataSize);
 
 
@@ -432,8 +432,8 @@ static int MakeSubItem(LPVOID lpData, uint32_t maxSize, PHWSUBITEM_OBJ lpSubItem
 }
 
 /************************************************************************/
-/* 保存子项目                                                           */
-/* alignMode: 1,Margin; 2,Padding                                       */
+/* save the subproject */
+/* alignMode: 1,Margin; 2,Padding                                      */
 /************************************************************************/
 static int SaveSubItem(int alignMode) {
   if (lpSubItem == NULL) return -1;
@@ -471,8 +471,8 @@ static int SaveSubItem(int alignMode) {
         WCHAR szTemp[MAX_PATH];
 
         mbstowcs_s(&stOut, szTemp, CURRENT.hdrHuaWei.chItemVersion, sizeof(HW_HDR::chItemVersion));
-        wsprintf(szText, L"构造子项目出错: [%s]:[%d] !", szTemp, ret);
-        MessageBoxW(hDlgFmt, szText, L"警告", MB_OK | MB_ICONWARNING);
+        wsprintf(szText, L"Error constructing subitem: [%s]:[%d] !", szTemp, ret);
+        MessageBoxW(hDlgFmt, szText, L"warning", MB_OK | MB_ICONWARNING);
       }
       else {
         offset += ret;
@@ -489,9 +489,9 @@ static int SaveSubItem(int alignMode) {
   free(lpMem);
 
   if (result != 0)
-    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"保存WHWH数据失败,错误码:[%d]!", result);
+    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"Failed to save WHWH data, error code: [%d]!", result);
   else
-    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"保存WHWH数据完成.");
+    SetTooltip(GetDlgItem(hDlgFmt, IDC_LBL_ADF_STATUS), L"Save WHWH data completed.");
 
   return result;
 }
@@ -538,7 +538,7 @@ static void SaveHeader_UIMG()
 
   HWNP_CalibrationImageHeaderCrc32(&lpCurrentItem->hdrImage);
 
-  // 修正HW_HDR CRC32
+  // Fix HW_HDR CRC32
   crc32 = 0;
   crc32 = crc32_fast(&lpCurrentItem->hdrImage, sizeof(UIMG_HDR), crc32);
   crc32 = crc32_fast(lpCurrentItem->lpcImageData, lpCurrentItem->hdrHuaWei.u32RearSize - sizeof(UIMG_HDR), crc32);
@@ -554,7 +554,7 @@ static void SaveHeader_UIMG()
 
 
 /************************************************************************/
-/* 保存全部                                                             */
+/* save all                                                          */
 /************************************************************************/
 static void SaveAll() {
   if (lpCurrentItem && lpCurrentItem->bIsImage)
@@ -570,9 +570,9 @@ static void SaveAll() {
   SaveSubItem(1);
 }
 
-/************************************************************************/
-/* 枚举WHWH子项目的数量                                                 */
-/************************************************************************/
+/**************************************************** ************************/
+/* Enumerate the number of WHWH sub-items */
+/**************************************************** ************************/
 static uint32_t EnumSubItem() {
   const BYTE *lpData = (const BYTE*)lpItemData;
   const HW_HDR *lpHeader;
@@ -581,7 +581,7 @@ static uint32_t EnumSubItem() {
 
   if (lpData == NULL) return result;
 
-  //判断头长度是否满足
+  // Determine whether the header length is satisfied
   while (offset + sizeof(HW_HDR) < u32DataSize) {
     lpHeader = (const PHW_HDR)(&lpData[offset]);
 
@@ -610,14 +610,14 @@ static int InitSubItem(PHWSUBITEM_OBJ lpCurrent, LPCVOID lpData) {
 
   lpImgHdr = NULL;
 
-  // 判断是否UImage
+  // Determine whether UImage
   if (lpHwHdr->u32RearSize >= sizeof(UIMG_HDR)) {
     lpImgHdr = (PUIMG_HDR)(MakePointer32(lpData, sizeof(HW_HDR)));
 
     if (lpImgHdr->ih_magic == IH_MAGIC_LE) {
       uint32_t size = EndianSwap32(lpImgHdr->ih_size);
 
-      // 判断UImage Data长度 + UImage Header长度是否越界
+      // Determine whether UImage Data length + UImage Header length is out of bounds
       if (lpHwHdr->u32RearSize - sizeof(UIMG_HDR) >= size) {
         lpCurrent->bIsImage = TRUE;
       }
@@ -626,28 +626,28 @@ static int InitSubItem(PHWSUBITEM_OBJ lpCurrent, LPCVOID lpData) {
 
   lpCurrent->lpcHuaWeiData = MakePointer32(lpData, sizeof(HW_HDR));
 
-  // 如果存在UImage
+  // if UImage exists
   if (lpCurrent->bIsImage && lpImgHdr) {
     lpCurrent->hdrImage = *lpImgHdr;
 
     lpCurrent->lpcImageData = MakePointer32(lpCurrent->lpcHuaWeiData, sizeof(UIMG_HDR));
   }
 
-  // 标记该项目已初始化
+  // mark the project as initialized
   lpCurrent->bIsInit = TRUE;
 
   return alignPage((int)(sizeof(HW_HDR) + lpHwHdr->u32RearSize));
 }
 
 /************************************************************************/
-/* 初始化每个子项目元素                                                 */
+/* Initialize each subitem element                                               */
 /************************************************************************/
 static uint32_t InitSubItemList() {
   const BYTE *lpData = (const BYTE*)lpItemData;
   uint32_t offset = 0, index = 0;
   int ret;
 
-  // 循环初始化每个子项目
+  // loop to initialize each sub-item
   while ((offset + sizeof(HW_HDR) < u32DataSize) && (index < nSubItem)) {
 #define CURRENT     (lpSubItem[index])
     ret = InitSubItem(&CURRENT, &lpData[offset]);
@@ -758,7 +758,7 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
   ret = HWNP_GetItemInfoByIndex(nIndex, &hwItemInfo);
 
   if (ret != 0) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"获取项目信息失败:[%d].", ret);
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to get item information: [%d].", ret);
     return TRUE;
   }
   else
@@ -768,7 +768,7 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
     WCHAR szPath[MAX_PATH];
 
     mbstowcs_s(&stOut, szPath, hwItemInfo.chItemPath, sizeof(HWNP_ITEMINFO::chItemPath));
-    wsprintf(szText, L"高级项目数据格式编辑 => [%s]", szPath);
+    wsprintf(szText, L"Advanced project data format editing => [%s]", szPath);
 
     SetWindowTextW(hDlg, szText);
   }
@@ -776,14 +776,14 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
   ret = HWNP_GetItemDataSizeByIndex(nIndex, &u32DataSize);
 
   if (ret != 0) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"获取项目数据大小失败:[%d].", ret);
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to get item data size: [%d].", ret);
     return TRUE;
   }
 
   ret = HWNP_GetItemDataPointerByIndex(nIndex, &lpItemData);
 
   if (ret != 0) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"获取项目数据偏移失败:[%d].", ret);
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to get item data offset: [%d].", ret);
     return TRUE;
   }
 
@@ -791,30 +791,30 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
   ret = HWNP_GetItemDataTypeByIndex(nIndex, &dwType);
 
   if (ret != 0) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"获取项目数据类型失败:[%d].", ret);
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to get item data type: [%d].", ret);
     return TRUE;
   }
 
 
   if (!(CHK_FLAGS(dwType, IDT_WHWH))) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"项目数据类型不匹配!");
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Item data type mismatch!");
     return TRUE;
   }
 
   if (u32DataSize <= sizeof(HW_HDR)) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"项目数据长度太小!");
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Item data length is too small!");
     return TRUE;
   }
 
   if (lpItemData == NULL) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"项目数据指针不合法!");
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Item data pointer is invalid!");
     return TRUE;
   }
 
   ret = ParseSubItem();
 
   if (ret != 0) {
-    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"解析子项目失败:[%d]!", ret);
+    SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to parse subitem: [%d]!", ret);
     return TRUE;
   }
 
@@ -824,7 +824,7 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
   if (UpdateDataView() == FALSE)
   {
     Release();
-    MessageBoxW(hDlg, L"解析高级数据结构出现错误!", L"警告", MB_ICONWARNING | MB_OK);
+    MessageBoxW(hDlg, L"Error parsing advanced data structure!", L"Warning", MB_ICONWARNING | MB_OK);
     EndDialog(hDlg, 0);
     return (INT_PTR)FALSE;
   }
@@ -833,7 +833,7 @@ static INT_PTR InitDlg(HWND hDlg, uint32_t nIndex) {
   if (u32DataSize < sizeof(HW_HDR) + hdrWHWH.u32RearSize)
   {
     //EnableWindow(hDlg, FALSE);
-    MessageBoxW(hDlg, L"WHWH数据长度大于项目数据长度!", L"错误", MB_ICONERROR | MB_OK);
+    MessageBoxW(hDlg, L"WHWH data length is greater than item data length!", L"Error", MB_ICONERROR | MB_OK);
     return (INT_PTR)TRUE;
   }
   */
@@ -878,7 +878,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
     {
       switch (wId)
       {
-        //检查WHWH数据CRC32
+        //Check WHWH data CRC32
       case IDC_BTN_WHCHK:
       {
         uint32_t u32CRC;
@@ -887,18 +887,18 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           u32CRC = crc32_fast(lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize);
 
           if (u32CRC == lpCurrentItem->hdrHuaWei.u32RearCRC)
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH数据CRC32检查正确.");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH data CRC32 check is correct.");
           else
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH数据CRC32检查不正确, 计算结果:0x%08X!", u32CRC);
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"WHWH data CRC32 check is incorrect, calculation result: 0x%08X!", u32CRC);
         }
         else {
-          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"无效的子项目!");
+          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Invalid subitem!");
         }
 
       }
       break;
 
-      //检查UIMG头部CRC32
+      //Check UIMG header CRC32
       case IDC_BTN_UBCH:
         if (lpCurrentItem && lpCurrentItem->bIsImage)
         {
@@ -911,13 +911,13 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           u32CRC = crc32_fast(&hdrTmp, sizeof(UIMG_HDR));
 
           if (u32CRC == EndianSwap32(lpCurrentItem->hdrImage.ih_hcrc))
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG头部CRC32检查正确.");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"The UIMG header CRC32 check is correct.");
           else
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG头部CRC32检查不正确, 计算结果:%08X (LE)!", u32CRC);
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG header CRC32 check is incorrect, calculation result:%08X (LE)!", u32CRC);
         }
         break;
 
-        //检查UIMG数据CRC32
+        //Check UIMG data CRC32
       case IDC_BTN_UBCD:
         if (lpCurrentItem && lpCurrentItem->bIsImage)
         {
@@ -926,13 +926,13 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           u32CRC = crc32_fast(lpCurrentItem->lpcImageData, EndianSwap32(lpCurrentItem->hdrImage.ih_size));
 
           if (u32CRC == EndianSwap32(lpCurrentItem->hdrImage.ih_dcrc))
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG数据CRC32检查正确.");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"The UIMG data CRC32 check is correct.");
           else
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG数据CRC32检查不正确, 计算结果:%08X (LE)!", u32CRC);
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"UIMG data CRC32 check is incorrect, calculation result:%08X (LE)!", u32CRC);
         }
         break;
 
-        //导出WHWH数据
+        //Export WHWH data
       case IDC_BTN_WHEXP:
 
         if (lpCurrentItem) {
@@ -941,15 +941,15 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
           {
             if (ExportToFile(wsTmp, lpCurrentItem->lpcHuaWeiData, lpCurrentItem->hdrHuaWei.u32RearSize))
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据完成.");
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Export WHWH data completed.");
             else
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出WHWH数据失败,错误码:[%d]!", GetLastError());
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to export WHWH data, error code: [%d]!", GetLastError());
           }
         }
 
         break;
 
-        //导入WHWH数据
+        //Import WHWH data
       case IDC_BTN_WHIMP:
 
         if (lpCurrentItem) {
@@ -959,7 +959,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
         break;
 
-        //导出UIMG数据
+        //Export UIMG data
       case IDC_BTN_UBEXP:
         if (lpCurrentItem && lpCurrentItem->bIsImage)
         {
@@ -968,9 +968,9 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           if (GetSaveFilePath(hDlg, wsTmp, MAX_PATH))
           {
             if (ExportToFile(wsTmp, lpCurrentItem->lpcImageData, EndianSwap32(lpCurrentItem->hdrImage.ih_size)))
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出UIMG数据完成.");
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Export UIMG data completed.");
             else
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出UIMG数据失败,错误码:[%d]!", GetLastError());
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to export UIMG data, error code: [%d]!", GetLastError());
           }
         }
         break;
@@ -985,30 +985,30 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
         }
         break;
 
-        //保存WHWH 头部
+        //Save the WHWH header
       case IDC_BTN_WHSAVE:
         SaveHeader_WHWH();
         break;
 
-        //保存UIMG 头部
+        //Save UIMG header
       case IDC_BTN_UBSAVE:
         SaveHeader_UIMG();
         break;
 
-        //保存WHWH 头部 + UIMG 头部 + 数据
+        //Save WHWH header + UIMG header + data
       case IDC_BTN_ADF_SAVE:
         SaveAll();
         Release();
         EndDialog(hDlg, IDOK);
         break;
 
-        //返回上级窗口
+        //Return to the upper-level window
       case IDC_BTN_ADF_BACK:
         Release();
         EndDialog(hDlg, IDCANCEL);
         break;
 
-      //添加华为子项目
+        //Add Huawei subproject
       case IDC_BTN_ADD_HW_ITEM:
       {
         LPVOID lpData = NULL;
@@ -1023,13 +1023,13 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
 
           if (!ImportFromFile(szFile, &lpData, &dwSize)) {
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导入文件数据失败!");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Import file data failed!");
             if (lpData != NULL) free(lpData);
             break;
           }
 
           if (dwSize <= sizeof(HW_HEADER)) {
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"文件大小不合法!");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Invalid file size!");
             if (lpData != NULL) free(lpData);
             break;
           }
@@ -1037,7 +1037,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           lpHwHdr = (PHW_HEADER)lpData;
 
           if (lpHwHdr->u32Magic != HWNP_HWHW_MAGIC) {
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"文件头魔法字不正确!");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"The magic word in the file header is incorrect!");
             if (lpData != NULL) free(lpData);
             break;
           }
@@ -1045,7 +1045,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           lpNewSubItem = (PHWSUBITEM_OBJ)_recalloc(lpSubItem, nSubItem + 1, sizeof(HWSUBITEM_OBJ));
 
           if (lpNewSubItem == NULL) {
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"重新分配内存失败!");
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Reallocation failed!");
             if (lpData != NULL) free(lpData);
             break;
           }
@@ -1053,7 +1053,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
           ret = InitSubItem(&lpNewSubItem[nSubItem], lpData);
 
           if (ret < 0) {
-            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"解析对象失败: [%d]!", ret);
+            SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to parse object: [%d]!", ret);
             if (lpData != NULL) free(lpData);
             break;
           }
@@ -1069,7 +1069,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       }
       break;
 
-      //导出选中子项目
+      //Export selected sub-items
       case IDC_BTN_EXP_HW_ITEM:
       {
         int ret;
@@ -1090,14 +1090,14 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
             ret = MakeSubItem(lpData, lpCurrentItem->u32TotalSize, lpCurrentItem, FALSE, TRUE);
 
             if (ret < 0) {
-              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"构造子对象失败: [%d]!", ret);
+              SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to construct child object: [%d]!", ret);
             }
             else {
               if (ExportToFile(szFile, lpData, ret)) {
-                SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出子项目成功: [%s]", szFile);
+                SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Export sub-item successful: [%s]", szFile);
               }
               else {
-                SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"导出子项目失败 !!!");
+                SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Failed to export subitem!!!");
               }
             }
           }
@@ -1108,7 +1108,7 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
       }
       break;
 
-      //删除选中子项目
+      //delete selected subitem
       case IDC_BTN_DEL_HW_ITEM:
       {
         PHWSUBITEM_OBJ lpNewSubItem;
@@ -1116,14 +1116,14 @@ INT_PTR CALLBACK DlgProc_AdvDatFmt(HWND hDlg, UINT message, WPARAM wParam, LPARA
         if (lpCurrentItem == NULL) break;
 
         if (nSubItem <= 1) {
-          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"无法继续删除子项目, 一个项目中至少包含一个子项目!");
+          SetTooltip(GetDlgItem(hDlg, IDC_LBL_ADF_STATUS), L"Cannot continue to delete sub-items, an item contains at least one sub-item!");
           break;
         }
 
         lpNewSubItem = (PHWSUBITEM_OBJ)calloc(nSubItem - 1, sizeof(HWSUBITEM_OBJ));
 
         for (uint32_t i = 0, index = 0; i < nSubItem; i++) {
-          //跳过需要删除的子项目
+          //Skip sub-items that need to be deleted
           if (&lpSubItem[i] == lpCurrentItem) continue;
 
           memcpy_s(&lpNewSubItem[index], sizeof(HWSUBITEM_OBJ), &lpSubItem[i], sizeof(HWSUBITEM_OBJ));
