@@ -3,9 +3,9 @@
   <assemblyIdentity version="1.0.0.0" name="HWFW_GUI"/>
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
-      <!-- 设计此应用程序与其一起工作且已针对此应用程序进行测试的
-           Windows 版本的列表。取消评论适当的元素，Windows 将
-           自动选择最兼容的环境。 -->
+      <!-- This application is designed to work with and tested against this application
+           List of Windows versions. Uncomment the appropriate element and Windows will
+           The most compatible environment is automatically selected. -->
 
       <!-- Windows Vista -->
       <!--<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />-->
@@ -25,10 +25,10 @@
     </application>
   </compatibility>
 
-  <!-- 指示该应用程序可以感知 DPI 且 Windows 在 DPI 较高时将不会对其进行
-       自动缩放。Windows Presentation Foundation (WPF)应用程序自动感知 DPI，无需
-       选择加入。选择加入此设置的 Windows 窗体应用程序(目标设定为 .NET Framework 4.6 )还应
-       在其 app.config 中将 "EnableWindowsFormsHighDpiAutoResizing" 设置设置为 "true"。-->
+  <!-- Indicates that the application is DPI-aware and Windows will not respond to it at higher DPIs
+       Automatic scaling. Windows Presentation Foundation (WPF) applications are automatically DPI aware without the need for
+       Opt-in. Windows Forms applications (targeted to .NET Framework 4.6 ) that opt ​​in to this setting should also
+       Set the "EnableWindowsFormsHighDpiAutoResizing" setting to "true" in its app.config. -->
 
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
@@ -36,7 +36,7 @@
     </windowsSettings>
   </application>
 
-  <!-- 启用 Windows 公共控件和对话框的主题(Windows XP 和更高版本) -->
+  <!-- Enable themes for Windows common controls and dialogs (Windows XP and later) -->
   <dependency>
     <dependentAssembly>
       <assemblyIdentity
