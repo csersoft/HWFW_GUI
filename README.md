@@ -33,12 +33,6 @@ Donate
 如果本软件对你有帮助，请考虑捐赠作者，以支持其继续开发！  
 If the software is helpful to you, please consider donating the author to support its continued development!
 
-#### 微信 (WeChat)
-![PREVIEW](./HWFW_GUI/wechat.bmp)
-
-#### 支付宝 (Alipay)
-![PREVIEW](./HWFW_GUI/alipay.bmp)
-
 License
 -------
 
